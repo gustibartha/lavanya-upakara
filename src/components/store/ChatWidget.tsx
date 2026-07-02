@@ -34,6 +34,7 @@ export function ChatWidget() {
 
   // Fungsi untuk mem-parsing teks dari AI dan mengekstrak rekomendasi produk [PROD:slug]
   const parseMessageContent = (content: string) => {
+    if (!content) return { cleanText: "", recommendations: [] };
     const regex = /\[PROD:([a-zA-Z0-9-]+)\]/g;
     let match;
     const recommendations = [];
@@ -137,10 +138,10 @@ export function ChatWidget() {
               type="text"
               placeholder="Tanya perlengkapan sembahyang..."
               className="chat-input"
-              value={input}
+              value={input || ""}
               onChange={handleInputChange}
             />
-            <button type="submit" className="chat-send-btn" disabled={!input.trim() || isLoading}>
+            <button type="submit" className="chat-send-btn" disabled={!input?.trim() || isLoading}>
               <Send size={18} />
             </button>
           </form>

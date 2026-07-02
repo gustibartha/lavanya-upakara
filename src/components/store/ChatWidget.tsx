@@ -100,16 +100,15 @@ export function ChatWidget() {
             ].map((msg: any) => {
               const { cleanText, recommendations } = parseMessageContent(msg.content);
               return (
-                <div key={msg.id} className={`chat-bubble-wrapper ${msg.role === 'user' ? 'user' : 'assistant'}`}>
-                  {msg.role === 'assistant' && (
+                <div key={msg.id} className={`chat-bubble-wrapper ${msg.role === "user" ? "user" : "assistant"}`}>
+                  {msg.role === "assistant" && (
                     <div className="chat-avatar bg-kunyit/20 text-kunyit"><Bot size={16} /></div>
                   )}
                   <div className="chat-bubble-content">
-                    <div className={`chat-bubble ${msg.role === 'user' ? 'bg-[#B84A2A] text-white' : 'bg-gray-100 text-[#1C1917]'}`} style={{ whiteSpace: "pre-wrap" }}>
+                    <div className={`chat-bubble ${msg.role === "user" ? "bg-[#B84A2A] text-white" : "bg-gray-100 text-[#1C1917]"}`} style={{ whiteSpace: "pre-wrap" }}>
                       {cleanText}
                     </div>
                     
-                    {/* Recommendations Card */}
                     {recommendations.length > 0 && (
                       <div className="chat-recommendations">
                         {recommendations.map(prod => (
@@ -117,21 +116,21 @@ export function ChatWidget() {
                             <img src={prod.image} alt={prod.nama_produk} className="chat-rec-img" />
                             <div className="chat-rec-info">
                               <h4 className="chat-rec-name">{prod.nama_produk}</h4>
-                              <span className="chat-rec-price">Rp {prod.harga.toLocaleString('id-ID')}</span>
+                              <span className="chat-rec-price">Rp {prod.harga.toLocaleString("id-ID")}</span>
                             </div>
                           </Link>
                         ))}
                       </div>
                     )}
                   </div>
-                  {msg.role === 'user' && (
+                  {msg.role === "user" && (
                     <div className="chat-avatar bg-gray-200 text-gray-600"><User size={16} /></div>
                   )}
                 </div>
               );
             })}
             
-            {isLoading && messages?.length > 0 && messages[messages.length - 1]?.role === 'user' && (
+            {(isLoading && messages && messages.length > 0 && messages[messages.length - 1]?.role === "user") && (
               <div className="chat-bubble-wrapper assistant">
                 <div className="chat-avatar bg-kunyit/20 text-kunyit"><Bot size={16} /></div>
                 <div className="chat-bubble bg-gray-100 text-[#1C1917] flex gap-1 items-center px-4 py-3">
@@ -141,7 +140,7 @@ export function ChatWidget() {
                 </div>
               </div>
             )}
-            <div ref={messagesEndRef} />
+            <div ref={messagesEndRef}></div>
           </div>
 
           <form onSubmit={handleSubmit} className="chat-footer">

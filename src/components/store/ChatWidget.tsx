@@ -18,7 +18,7 @@ export function ChatWidget() {
         content: "Om Swastyastu 🙏 Ada yang bisa saya bantu untuk keperluan sembahyang Anda hari ini? (Misal: 'Butuh banten Kuningan')",
       }
     ],
-  });
+  } as any);
   
   const { messages, input, handleInputChange, handleSubmit, isLoading } = chatHelper;
 

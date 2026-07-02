@@ -76,6 +76,12 @@ export function ChatWidget() {
         p.id === "prod-19" || // Kamen
         p.id === "prod-20"    // Selendang
       );
+    } else if (lowerText.includes("daksina")) {
+      responseContent = "Ini dia Daksina lengkap yang Anda cari. Sudah disusun rapi sesuai dengan pakem persembahyangan:";
+      recommendations = products.filter(p => p.id === "prod-21" || p.id === "prod-3");
+    } else if (lowerText.includes("segehan")) {
+      responseContent = "Untuk keperluan Bhuta Yadnya, kami menyediakan Segehan Panca Warna yang sudah lengkap dengan tetabuhannya:";
+      recommendations = products.filter(p => p.id === "prod-22");
     }
 
     return { content: responseContent, recommendations };

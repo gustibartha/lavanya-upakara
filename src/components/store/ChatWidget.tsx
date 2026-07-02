@@ -10,7 +10,7 @@ export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+  const chatHelper: any = useChat({
     initialMessages: [
       {
         id: "welcome",
@@ -19,6 +19,8 @@ export function ChatWidget() {
       }
     ],
   });
+  
+  const { messages, input, handleInputChange, handleSubmit, isLoading } = chatHelper;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

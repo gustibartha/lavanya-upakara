@@ -79,7 +79,13 @@ export function ChatWidget() {
           </div>
 
           <div className="chat-body">
-            {messages.map((msg: any) => {
+            {(messages?.length ? messages : [
+              {
+                id: "welcome",
+                role: "assistant",
+                content: "Om Swastyastu 🙏 Ada yang bisa saya bantu untuk keperluan sembahyang Anda hari ini? (Misal: 'Butuh banten Kuningan')",
+              }
+            ]).map((msg: any) => {
               const { cleanText, recommendations } = parseMessageContent(msg.content);
               return (
                 <div key={msg.id} className={`chat-bubble-wrapper ${msg.role === 'user' ? 'user' : 'assistant'}`}>
@@ -113,7 +119,7 @@ export function ChatWidget() {
               );
             })}
             
-            {isLoading && messages[messages.length - 1].role === 'user' && (
+            {isLoading && messages?.length > 0 && messages[messages.length - 1]?.role === 'user' && (
               <div className="chat-bubble-wrapper assistant">
                 <div className="chat-avatar bg-kunyit/20 text-kunyit"><Bot size={16} /></div>
                 <div className="chat-bubble bg-gray-100 text-[#1C1917] flex gap-1 items-center px-4 py-3">

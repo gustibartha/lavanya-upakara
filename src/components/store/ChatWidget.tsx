@@ -79,7 +79,7 @@ export function ChatWidget() {
           </div>
 
           <div className="chat-body">
-            {messages.map((msg) => {
+            {messages.map((msg: any) => {
               const { cleanText, recommendations } = parseMessageContent(msg.content);
               return (
                 <div key={msg.id} className={`chat-bubble-wrapper ${msg.role === 'user' ? 'user' : 'assistant'}`}>

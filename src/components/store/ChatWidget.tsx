@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Bot, User } from "lucide-react";
 import Link from "next/link";
 import { products } from "@/lib/data";
-import { useChat } from "ai/react";
+import { useChat } from "@ai-sdk/react";
 
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);

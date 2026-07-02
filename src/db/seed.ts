@@ -1,80 +1,14 @@
-// ==========================================
-// Lavanya Upakara — Database Seed Script
-// Populates initial data from the static data store
-// ==========================================
-
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import * as schema from "./schema";
-import path from "path";
+import * as dotenv from "dotenv";
 
-const DB_PATH = path.join(process.cwd(), "lavanya.db");
-const sqlite = new Database(DB_PATH);
-sqlite.pragma("journal_mode = WAL");
-sqlite.pragma("foreign_keys = ON");
-const db = drizzle(sqlite, { schema });
+dotenv.config({ path: ".env.local" });
 
-// NOTE: User table is managed by Better Auth (see auth-schema.ts)
+const connectionString = process.env.DATABASE_URL!;
+const client = postgres(connectionString, { prepare: false });
+const db = drizzle(client, { schema });
 
-sqlite.exec(`
-  CREATE TABLE IF NOT EXISTS stores (
-    id TEXT PRIMARY KEY,
-    nama_toko TEXT NOT NULL,
-    alamat TEXT NOT NULL,
-    latitude REAL NOT NULL,
-    longitude REAL NOT NULL,
-    kategori TEXT NOT NULL,
-    emoji TEXT NOT NULL DEFAULT '🏪',
-    telepon TEXT,
-    jam_buka TEXT DEFAULT '08:00',
-    jam_tutup TEXT DEFAULT '18:00',
-    created_at TEXT NOT NULL DEFAULT (datetime('now'))
-  );
-
-  CREATE TABLE IF NOT EXISTS products (
-    id TEXT PRIMARY KEY,
-    slug TEXT NOT NULL UNIQUE,
-    store_id TEXT NOT NULL REFERENCES stores(id),
-    nama_produk TEXT NOT NULL,
-    kategori TEXT NOT NULL,
-    kategori_slug TEXT NOT NULL,
-    harga INTEGER NOT NULL,
-    deskripsi TEXT NOT NULL,
-    emoji TEXT NOT NULL DEFAULT '📦',
-    bg_color TEXT NOT NULL DEFAULT '#FDF0DC',
-    populer INTEGER DEFAULT 0,
-    stok INTEGER DEFAULT 100,
-    created_at TEXT NOT NULL DEFAULT (datetime('now'))
-  );
-
-  CREATE TABLE IF NOT EXISTS orders (
-    id TEXT PRIMARY KEY,
-    user_id TEXT NOT NULL,
-    store_id TEXT NOT NULL REFERENCES stores(id),
-    total_harga INTEGER NOT NULL,
-    status TEXT NOT NULL DEFAULT 'menunggu',
-    alamat_kirim TEXT,
-    catatan TEXT,
-    created_at TEXT NOT NULL DEFAULT (datetime('now'))
-  );
-
-  CREATE TABLE IF NOT EXISTS order_items (
-    id TEXT PRIMARY KEY,
-    order_id TEXT NOT NULL REFERENCES orders(id),
-    product_id TEXT NOT NULL REFERENCES products(id),
-    jumlah INTEGER NOT NULL,
-    harga_satuan INTEGER NOT NULL
-  );
-`);
-
-sqlite.exec(`
-  DELETE FROM order_items;
-  DELETE FROM orders;
-  DELETE FROM products;
-  DELETE FROM stores;
-`);
-
-// Seed stores
 const storesData = [
   {
     id: "store-1",
@@ -171,31 +105,40 @@ const productsData = [
   { id: "prod-18", slug: "udeng-bali-putih", store_id: "store-4", nama_produk: "Udeng Bali Putih", kategori: "Pakaian Adat Bali", kategori_slug: "pakaian", harga: 55000, deskripsi: "Udeng (ikat kepala) putih polos untuk pria. Bahan katun premium, sudah dilipat siap pakai.", emoji: "🎀", bg_color: "#E8F0F5", populer: true },
   { id: "prod-19", slug: "kamen-saput-endek", store_id: "store-4", nama_produk: "Kamen Saput Endek", kategori: "Pakaian Adat Bali", kategori_slug: "pakaian", harga: 180000, deskripsi: "Kamen saput dari kain endek Bali asli. Motif tradisional, cocok untuk acara adat dan sembahyang.", emoji: "🧣", bg_color: "#E8F0F5", populer: false },
   { id: "prod-20", slug: "selendang-sembahyang", store_id: "store-2", nama_produk: "Selendang Sembahyang", kategori: "Pakaian Adat Bali", kategori_slug: "pakaian", harga: 45000, deskripsi: "Selendang kuning emas untuk dipakai saat sembahyang. Bahan satin halus, panjang 200cm.", emoji: "💛", bg_color: "#E8F0F5", populer: false },
+  { id: "prod-21", slug: "daksina-lengkap", store_id: "store-1", nama_produk: "Daksina Lengkap", kategori: "Sesajen & Canang Sari", kategori_slug: "sesajen", harga: 120000, deskripsi: "Banten Daksina lengkap untuk berbagai keperluan upacara Yadnya. Terbuat dari bahan-bahan pilihan sesuai dresta.", emoji: "🥥", bg_color: "#FDF0DC", populer: true },
+  { id: "prod-22", slug: "segehan-panca-warna", store_id: "store-5", nama_produk: "Segehan Panca Warna", kategori: "Sesajen & Canang Sari", kategori_slug: "sesajen", harga: 25000, deskripsi: "Segehan Panca Warna lengkap dengan nasi 5 warna untuk persembahan harian atau upacara pecaruan kecil.", emoji: "🍱", bg_color: "#FDF0DC", populer: false },
 ];
 
-// Seed a demo user
-const usersData = [
-  { id: "user-1", nama: "Ketut Suardana", email: "ketut@example.com", nomor_hp: "081234567890" },
-];
+async function seed() {
+  console.log("🌱 Seeding database to Supabase...");
+  
+  try {
+    // Clear existing data (optional, be careful in prod!)
+    await db.delete(schema.orderItems);
+    await db.delete(schema.orders);
+    await db.delete(schema.products);
+    await db.delete(schema.stores);
 
-console.log("🌱 Seeding database...");
+    console.log("Cleared existing data.");
 
-// Insert stores
-for (const store of storesData) {
-  db.insert(schema.stores).values(store).run();
+    // Insert stores
+    for (const store of storesData) {
+      await db.insert(schema.stores).values(store);
+    }
+    console.log(`  ✅ ${storesData.length} toko berhasil ditambahkan`);
+
+    // Insert products
+    for (const product of productsData) {
+      await db.insert(schema.products).values(product);
+    }
+    console.log(`  ✅ ${productsData.length} produk berhasil ditambahkan`);
+
+    console.log("\n🎉 Database Supabase berhasil di-seed!");
+  } catch (err) {
+    console.error("Error seeding database:", err);
+  } finally {
+    process.exit(0);
+  }
 }
-console.log(`  ✅ ${storesData.length} toko berhasil ditambahkan`);
 
-// Insert products
-for (const product of productsData) {
-  db.insert(schema.products).values(product).run();
-}
-console.log(`  ✅ ${productsData.length} produk berhasil ditambahkan`);
-
-// NOTE: Users are now registered through the /daftar page (Better Auth)
-console.log(`  ℹ️  User registration via /daftar (Better Auth)`);
-
-console.log("\n🎉 Database berhasil di-seed!");
-console.log(`   📁 File: ${DB_PATH}`);
-
-sqlite.close();
+seed();

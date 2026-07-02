@@ -3,7 +3,7 @@
 
 import db from "@/db";
 import { products, stores } from "@/db/schema";
-import { eq, like, and, or, sql } from "drizzle-orm";
+import { eq, ilike, and, or, sql } from "drizzle-orm";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -22,9 +22,9 @@ export async function GET(request: Request) {
     const searchTerm = `%${q}%`;
     conditions.push(
       or(
-        like(products.nama_produk, searchTerm),
-        like(products.kategori, searchTerm),
-        like(products.deskripsi, searchTerm)
+        ilike(products.nama_produk, searchTerm),
+        ilike(products.kategori, searchTerm),
+        ilike(products.deskripsi, searchTerm)
       )!
     );
   }
@@ -58,8 +58,7 @@ export async function GET(request: Request) {
     })
     .from(products)
     .leftJoin(stores, eq(products.store_id, stores.id))
-    .where(where)
-    .all();
+    .where(where);
 
   return Response.json({ products: result, total: result.length });
 }

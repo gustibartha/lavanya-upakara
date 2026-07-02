@@ -11,7 +11,7 @@ export async function GET(
 ) {
   const { slug } = await params;
 
-  const result = await db
+  const [result] = await db
     .select({
       id: products.id,
       slug: products.slug,
@@ -33,7 +33,7 @@ export async function GET(
     .from(products)
     .leftJoin(stores, eq(products.store_id, stores.id))
     .where(eq(products.slug, slug))
-    .get();
+    .limit(1);
 
   if (!result) {
     return Response.json({ error: "Produk tidak ditemukan" }, { status: 404 });
@@ -52,8 +52,7 @@ export async function GET(
     })
     .from(products)
     .where(eq(products.kategori_slug, result.kategori_slug))
-    .limit(4)
-    .all();
+    .limit(4);
 
   return Response.json({
     product: result,

@@ -29,7 +29,7 @@ export async function GET(request: Request) {
   const lng = searchParams.get("lng");
   const radiusKm = parseFloat(searchParams.get("radius") || "10");
 
-  const allStores = await db.select().from(stores).all();
+  const allStores = await db.select().from(stores);
 
   // Parse kategori JSON for all stores
   const parsed = allStores.map((store) => ({

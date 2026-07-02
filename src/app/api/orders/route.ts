@@ -41,11 +41,11 @@ export async function POST(request: Request) {
     const itemsWithPrice: Array<OrderItemInput & { harga_satuan: number }> = [];
 
     for (const item of body.items) {
-      const product = await db
+      const [product] = await db
         .select()
         .from(products)
         .where(eq(products.id, item.product_id))
-        .get();
+        .limit(1);
 
       if (!product) {
         return Response.json(
@@ -122,8 +122,7 @@ export async function GET(request: Request) {
   const userOrders = await db
     .select()
     .from(orders)
-    .where(eq(orders.user_id, userId))
-    .all();
+    .where(eq(orders.user_id, userId));
 
   return Response.json({ orders: userOrders, total: userOrders.length });
 }

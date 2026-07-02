@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lavanya Upakara — Sarana Sembahyang, Mudah & Dekat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   LAVANYA UPAKARA — Design System (main.css)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+
+:root {
+  --krem:        #F9F3E8;
+  --krem-dark:   #EFE5CC;
+  --kunyit:      #C8690A;
+  --kunyit-mid:  #E8913A;
+  --kunyit-lite: #FBF0DC;
+  --bata:        #A83820;
+  --bata-lite:   #FAE7E1;
+  --emas:        #D4A820;
+  --emas-lite:   #FBF5DC;
+  --pandan:      #285C42;
+  --pandan-lite: #E4F0EA;
+  --malam:       #180E04;
+  --coklat:      #3D2010;
+  --coklat-mid:  #7A4A28;
+  --muted:       #A08060;
+  --white:       #FFFFFF;
+  --border:      rgba(92, 61, 30, 0.12);
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body:    'Plus Jakarta Sans', sans-serif;
+  --nav-h: 72px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --shadow-sm:  0 2px 12px rgba(24, 14, 4, 0.07);
+  --shadow-md:  0 8px 32px rgba(24, 14, 4, 0.10);
+  --shadow-lg:  0 20px 60px rgba(24, 14, 4, 0.13);
+  --shadow-warm: 0 8px 40px rgba(200, 105, 10, 0.18);
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--krem);
+  color: var(--malam);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+img { display: block; max-width: 100%; }
+a { text-decoration: none; color: inherit; }
+button { cursor: pointer; border: none; background: none; font-family: inherit; }
+ul { list-style: none; }
+input, select, textarea { font-family: inherit; outline: none; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--krem-dark); }
+::-webkit-scrollbar-thumb { background: var(--kunyit-mid); border-radius: 3px; }
+
+.container { max-width: 1240px; margin: 0 auto; padding: 0 2rem; }
+.page-content { padding-top: var(--nav-h); min-height: 100vh; }
+
+/* --- BUTTONS --- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 0.5rem; padding: 0.7rem 1.5rem; border-radius: 100px;
+  font-family: var(--font-body); font-size: 0.875rem; font-weight: 500;
+  transition: all 0.2s ease; white-space: nowrap;
+}
+.btn-primary { background: var(--bata); color: var(--white); box-shadow: 0 4px 20px rgba(168,56,32,0.3); }
+.btn-primary:hover { background: var(--malam); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(168,56,32,0.35); }
+.btn-outline { background: transparent; color: var(--coklat-mid); border: 1.5px solid var(--border); }
+.btn-outline:hover { border-color: var(--kunyit); color: var(--kunyit); background: var(--kunyit-lite); }
+.btn-lg { padding: 0.9rem 2rem; font-size: 1rem; }
+
+/* --- NAVBAR --- */
+.navbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  height: var(--nav-h); display: flex; align-items: center;
+  background: rgba(249,243,232,0.94); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border); transition: box-shadow 0.3s;
+}
+.navbar.scrolled { box-shadow: var(--shadow-md); }
+.nav-inner { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+.nav-logo { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--bata); letter-spacing: -0.01em; }
+.nav-logo span { color: var(--kunyit); font-style: italic; }
+.nav-links { display: flex; align-items: center; gap: 0.25rem; }
+.nav-links a { font-size: 0.875rem; font-weight: 500; color: var(--coklat-mid); padding: 0.5rem 0.85rem; border-radius: 8px; transition: all 0.2s; }
+.nav-links a:hover, .nav-links a.active { color: var(--kunyit); background: var(--kunyit-lite); }
+.nav-actions { display: flex; align-items: center; gap: 0.75rem; }
+.nav-cart-btn {
+  position: relative; width: 40px; height: 40px; border-radius: 50%;
+  background: var(--white); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; transition: all 0.2s; color: var(--coklat); cursor: pointer;
+}
+.nav-cart-btn:hover { background: var(--kunyit-lite); border-color: var(--kunyit); color: var(--kunyit); }
+.cart-badge {
+  position: absolute; top: -3px; right: -3px;
+  width: 18px; height: 18px; background: var(--bata); color: white;
+  font-size: 0.6rem; font-weight: 700; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; border: 2px solid var(--krem);
+}
+.nav-user-btn {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.4rem 0.75rem 0.4rem 0.4rem; border-radius: 100px;
+  background: var(--white); border: 1px solid var(--border); transition: all 0.2s; cursor: pointer;
+}
+.nav-user-btn:hover { border-color: var(--kunyit); background: var(--kunyit-lite); }
+.nav-avatar {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--bata);
+  color: white; font-size: 0.7rem; font-weight: 700; display: flex; align-items: center; justify-content: center;
+}
+.nav-avatar-name { font-size: 0.8rem; font-weight: 500; color: var(--coklat); }
+
+/* --- PRODUCT CARD --- */
+.product-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s; position: relative;
+}
+.product-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: transparent; }
+.product-card-img {
+  height: 200px; display: flex; align-items: center; justify-content: center;
+  font-size: 3rem; position: relative; overflow: hidden;
+}
+.product-card-body { padding: 1.1rem; }
+.product-store { font-size: 0.72rem; color: var(--muted); margin-bottom: 0.3rem; }
+.product-name { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; color: var(--malam); line-height: 1.25; margin-bottom: 0.5rem; }
+.product-rating { display: flex; align-items: center; gap: 0.3rem; font-size: 0.78rem; color: var(--muted); margin-bottom: 0.6rem; }
+.product-rating .stars { color: var(--emas); }
+.product-footer { display: flex; align-items: center; justify-content: space-between; }
+.product-price { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; color: var(--bata); }
+.product-add-btn {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--bata); color: white;
+  font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; border: none; cursor: pointer;
+}
+.product-add-btn:hover { background: var(--malam); transform: scale(1.1); }
+.wishlist-btn {
+  position: absolute; top: 0.75rem; right: 0.75rem; width: 32px; height: 32px;
+  border-radius: 50%; background: rgba(255,255,255,0.9); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
+  transition: all 0.2s; backdrop-filter: blur(4px);
+}
+.wishlist-btn:hover { transform: scale(1.15); }
+
+/* --- STORE CARD --- */
+.store-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: transform 0.25s, box-shadow 0.25s; cursor: pointer; }
+.store-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.store-card-banner { height: 120px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 3rem; }
+.store-card-body { padding: 1rem; }
+.store-name { font-family: var(--font-display); font-size: 1rem; font-weight: 600; color: var(--malam); margin-bottom: 0.25rem; }
+.store-meta { font-size: 0.78rem; color: var(--muted); display: flex; align-items: center; gap: 0.75rem; }
+.store-dist-badge { display: inline-flex; align-items: center; gap: 0.25rem; background: var(--pandan-lite); color: var(--pandan); padding: 0.2rem 0.6rem; border-radius: 100px; font-size: 0.72rem; font-weight: 600; }
+
+/* --- SECTION HEADER --- */
+.section-header { margin-bottom: 2.5rem; }
+.section-tag { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--kunyit); margin-bottom: 0.5rem; }
+.section-title { font-family: var(--font-display); font-size: clamp(1.75rem,3vw,2.5rem); font-weight: 700; color: var(--malam); line-height: 1.15; letter-spacing: -0.02em; }
+.section-sub { font-size: 0.95rem; color: var(--muted); margin-top: 0.5rem; line-height: 1.65; font-weight: 300; }
+
+/* --- BADGE --- */
+.badge { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.25rem 0.65rem; border-radius: 100px; font-size: 0.72rem; font-weight: 600; }
+.badge-kunyit { background: var(--kunyit-lite); color: var(--kunyit); }
+.badge-bata   { background: var(--bata-lite); color: var(--bata); }
+.badge-pandan { background: var(--pandan-lite); color: var(--pandan); }
+.badge-emas   { background: var(--emas-lite); color: var(--emas); }
+
+/* --- TOAST --- */
+.toast-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.75rem; }
+.toast {
+  display: flex; align-items: center; gap: 0.75rem; background: var(--malam);
+  color: var(--white); padding: 0.85rem 1.25rem; border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg); font-size: 0.875rem; min-width: 260px;
+  animation: toastIn 0.35s ease both;
+}
+.toast.toast-success { border-left: 4px solid var(--pandan); }
+.toast.toast-error   { border-left: 4px solid var(--bata); }
+.toast.toast-info    { border-left: 4px solid var(--kunyit); }
+.toast.toast-out     { animation: toastOut 0.3s ease both; }
+@keyframes toastIn  { from { opacity:0; transform:translateX(30px); } to { opacity:1; transform:translateX(0); } }
+@keyframes toastOut { from { opacity:1; transform:translateX(0); } to { opacity:0; transform:translateX(30px); } }
+
+/* --- CART DRAWER --- */
+.cart-overlay { position: fixed; inset: 0; background: rgba(24,14,4,0.5); z-index: 300; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+.cart-overlay.open { opacity: 1; pointer-events: all; }
+.cart-drawer { position: fixed; top:0; right:0; bottom:0; width: 420px; background: var(--krem); z-index: 301; transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.32,0,0.15,1); display: flex; flex-direction: column; box-shadow: -20px 0 60px rgba(24,14,4,0.15); }
+.cart-drawer.open { transform: translateX(0); }
+.cart-drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 1.5rem; border-bottom: 1px solid var(--border); }
+.cart-title { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; color: var(--malam); }
+.cart-close { width: 36px; height: 36px; border-radius: 50%; background: var(--krem-dark); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--coklat); transition: all 0.2s; }
+.cart-close:hover { background: var(--bata-lite); color: var(--bata); }
+.cart-body { flex: 1; overflow-y: auto; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+.cart-item { display: flex; gap: 1rem; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0.85rem; }
+.cart-item-img { width: 60px; height: 60px; border-radius: var(--radius-sm); background: var(--krem-dark); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
+.cart-item-info { flex: 1; }
+.cart-item-name { font-size: 0.875rem; font-weight: 600; color: var(--malam); margin-bottom: 0.2rem; line-height: 1.3; }
+.cart-item-store { font-size: 0.72rem; color: var(--muted); margin-bottom: 0.5rem; }
+.qty-control { display: flex; align-items: center; gap: 0.5rem; }
+.qty-btn { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--border); background: var(--krem); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 600; color: var(--coklat); transition: all 0.15s; }
+.qty-btn:hover { border-color: var(--kunyit); color: var(--kunyit); }
+.qty-num { font-size: 0.875rem; font-weight: 600; min-width: 20px; text-align: center; color: var(--malam); }
+.cart-item-price { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--bata); white-space: nowrap; }
+.cart-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; text-align: center; color: var(--muted); }
+.cart-empty .empty-icon { font-size: 3.5rem; }
+.cart-empty p { font-size: 0.9rem; line-height: 1.65; font-weight: 300; }
+.cart-footer { padding: 1.25rem; border-top: 1px solid var(--border); background: var(--white); }
+.cart-subtotal { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+.cart-subtotal-label { font-size: 0.85rem; color: var(--muted); }
+.cart-subtotal-value { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; color: var(--malam); }
+.cart-checkout-btn { width: 100%; padding: 1rem; background: var(--bata); color: white; border: none; border-radius: var(--radius-md); font-family: var(--font-body); font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+.cart-checkout-btn:hover { background: var(--malam); transform: translateY(-1px); }
+
+/* --- FOOTER --- */
+footer { background: var(--malam); color: var(--muted); padding: 4rem 0 2rem; margin-top: 5rem; }
+.footer-grid { display: grid; grid-template-columns: 1.8fr 1fr 1fr 1fr; gap: 3rem; padding-bottom: 3rem; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 2rem; }
+.footer-brand .nav-logo { font-size: 1.3rem; margin-bottom: 0.75rem; }
+.footer-brand p { font-size: 0.85rem; line-height: 1.7; font-weight: 300; max-width: 240px; }
+.footer-col-title { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--krem); margin-bottom: 1rem; }
+.footer-links li { margin-bottom: 0.5rem; }
+.footer-links a { font-size: 0.85rem; color: var(--muted); font-weight: 300; transition: color 0.2s; }
+.footer-links a:hover { color: var(--kunyit-mid); }
+.footer-bottom { display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; color: rgba(160,128,96,0.5); }
+
+/* --- ANIMATIONS --- */
+@keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+@keyframes scaleIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+.anim-fadeup { animation: fadeUp 0.6s ease both; }
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.12s; }
+.stagger-3 { animation-delay: 0.19s; }
+.stagger-4 { animation-delay: 0.26s; }
+.stagger-5 { animation-delay: 0.33s; }
+.stagger-6 { animation-delay: 0.40s; }
+.reveal { opacity:0; transform:translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+
+/* ============================================================
+   HOME PAGE STYLES (home.css)
+   ============================================================ */
+
+/* --- HERO --- */
+.hero { min-height: 100vh; display: flex; align-items: center; position: relative; overflow: hidden; padding-top: var(--nav-h); }
+.hero-bg-pattern { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 60% at 80% 40%, rgba(200,105,10,0.08) 0%, transparent 60%), radial-gradient(ellipse 40% 50% at 10% 70%, rgba(45,106,79,0.06) 0%, transparent 60%); pointer-events: none; }
+.hero-inner { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 5rem; padding: 4rem 0; }
+
+.hero-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--kunyit-lite); border: 1px solid rgba(200,105,10,0.25); color: var(--kunyit); padding: 0.35rem 1rem; border-radius: 100px; font-size: 0.78rem; font-weight: 600; margin-bottom: 1.5rem; width: fit-content; }
+.hero-badge-dot { width: 7px; height: 7px; background: var(--kunyit-mid); border-radius: 50%; animation: badgePulse 2s infinite; }
+@keyframes badgePulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.5;transform:scale(1.4);} }
+
+.hero-title { font-family: var(--font-display); font-size: clamp(2.5rem,4.5vw,3.75rem); font-weight: 700; color: var(--malam); line-height: 1.08; letter-spacing: -0.03em; margin-bottom: 1.25rem; }
+.hero-title em { font-style: italic; color: var(--kunyit); }
+.hero-desc { font-size: 1rem; color: var(--coklat-mid); line-height: 1.7; font-weight: 300; max-width: 480px; margin-bottom: 2rem; }
+
+.hero-search { display: flex; align-items: center; background: var(--white); border: 1.5px solid var(--border); border-radius: 100px; padding: 0.5rem 0.5rem 0.5rem 1.25rem; box-shadow: var(--shadow-md); gap: 0.75rem; max-width: 480px; margin-bottom: 1.25rem; transition: border-color 0.2s, box-shadow 0.2s; }
+.hero-search:focus-within { border-color: var(--kunyit); box-shadow: 0 0 0 4px rgba(200,105,10,0.1), var(--shadow-md); }
+.hero-search-icon { font-size: 1rem; flex-shrink: 0; }
+.hero-search-input { flex: 1; border: none; background: transparent; font-size: 0.9rem; color: var(--malam); font-family: var(--font-body); }
+.hero-search-input::placeholder { color: var(--muted); }
+.hero-search-btn { background: var(--bata); color: white; border: none; border-radius: 100px; padding: 0.6rem 1.25rem; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: background 0.2s; font-family: var(--font-body); white-space: nowrap; }
+.hero-search-btn:hover { background: var(--malam); }
+
+.hero-tags { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2.5rem; }
+.hero-tag-label { font-size: 0.78rem; color: var(--muted); font-weight: 500; }
+.hero-tag { font-size: 0.78rem; color: var(--kunyit); background: var(--kunyit-lite); padding: 0.25rem 0.75rem; border-radius: 100px; border: 1px solid rgba(200,105,10,0.2); transition: all 0.2s; }
+.hero-tag:hover { background: var(--kunyit); color: white; border-color: var(--kunyit); }
+
+.hero-stats { display: flex; align-items: center; gap: 1.5rem; }
+.hero-stat { text-align: left; }
+.hero-stat-num { display: block; font-family: var(--font-display); font-size: 1.75rem; font-weight: 700; color: var(--malam); line-height: 1; }
+.hero-stat-label { display: block; font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; }
+.hero-stat-divider { width: 1px; height: 36px; background: var(--border); }
+
+/* Hero Visual */
+.hero-visual { position: relative; height: 480px; }
+.hero-visual-card { position: absolute; background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); border: 1px solid var(--border); }
+.main-card { width: 320px; top: 50%; left: 50%; transform: translate(-55%,-50%); animation: floatCard 5s ease-in-out infinite; overflow: hidden; }
+@keyframes floatCard { 0%,100%{transform:translate(-55%,-50%);} 50%{transform:translate(-55%,calc(-50% - 12px));} }
+.card-header-color { height: 100px; background: linear-gradient(135deg, var(--bata), var(--kunyit)); position: relative; overflow: hidden; }
+.card-header-color::after { content:'🗺️'; position:absolute; font-size:3rem; opacity:0.25; bottom:-10px; right:10px; }
+.card-body-preview { padding: 1rem; }
+.mini-store-row { display: flex; align-items: center; gap: 0.65rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+.mini-store-row:last-of-type { border-bottom: none; }
+.mini-store-emoji { font-size: 1.3rem; }
+.mini-store-info { flex: 1; display: flex; flex-direction: column; }
+.mini-store-name { font-size: 0.8rem; font-weight: 600; color: var(--malam); }
+.mini-store-dist { font-size: 0.68rem; color: var(--muted); }
+.mini-store-open { font-size: 0.65rem; background: var(--pandan-lite); color: var(--pandan); padding: 0.15rem 0.5rem; border-radius: 100px; font-weight: 600; }
+.mini-products { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+.mini-prod { flex: 1; background: var(--krem); border-radius: 8px; padding: 0.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.2rem; font-size: 1.1rem; }
+.mini-prod span { font-size: 0.58rem; color: var(--muted); }
+.mini-prod b { font-size: 0.65rem; color: var(--bata); font-family: var(--font-display); }
+
+.float-card-1, .float-card-2, .float-card-3 { display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1rem; font-size: 0.78rem; font-weight: 500; color: var(--malam); white-space: nowrap; border-radius: 100px; }
+.float-card-1 span, .float-card-2 span, .float-card-3 span { font-size: 1rem; }
+.float-card-1 { top: 10%; right: 0; animation: floatCard2 6s 0.5s ease-in-out infinite; }
+.float-card-2 { bottom: 25%; right: -1rem; animation: floatCard2 7s 1s ease-in-out infinite; }
+.float-card-3 { bottom: 10%; left: 0; animation: floatCard2 5.5s 1.5s ease-in-out infinite; }
+@keyframes floatCard2 { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);} }
+
+/* --- CATEGORIES --- */
+.categories-section { padding: 5rem 0; }
+.categories-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 1rem; margin-top: 2rem; }
+.cat-card { display: flex; flex-direction: column; align-items: flex-start; gap: 0.75rem; padding: 1.5rem 1.25rem; border-radius: var(--radius-lg); text-decoration: none; transition: transform 0.25s, box-shadow 0.25s; position: relative; overflow: hidden; min-height: 160px; justify-content: flex-end; }
+.cat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.cat-1 { background: linear-gradient(135deg,#B84A2A,#D4790A); }
+.cat-2 { background: linear-gradient(135deg,#5C3D1E,#8B6040); }
+.cat-3 { background: linear-gradient(135deg,#9A4F0A,#C97B2A); }
+.cat-4 { background: linear-gradient(135deg,#2D6A4F,#3D8B65); }
+.cat-5 { background: linear-gradient(135deg,#2A4D6A,#3A6D8A); }
+.cat-emoji { font-size: 2rem; position: absolute; top: 1rem; left: 1.25rem; }
+.cat-name { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: white; line-height: 1.2; }
+.cat-count { font-size: 0.72rem; color: rgba(255,255,255,0.65); }
+.cat-arrow { position: absolute; bottom: 1rem; right: 1rem; width: 28px; height: 28px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: white; transition: background 0.2s; }
+.cat-card:hover .cat-arrow { background: rgba(255,255,255,0.3); }
+
+/* --- NEARBY STORES --- */
+.nearby-section { padding: 5rem 0; }
+.section-row { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 2.5rem; gap: 1rem; }
+.stores-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1.25rem; }
+
+/* --- PRODUCTS --- */
+.products-section { padding: 5rem 0; }
+.product-filter-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.filter-tab { padding: 0.5rem 1.1rem; border-radius: 100px; border: 1.5px solid var(--border); background: var(--white); font-size: 0.8rem; font-weight: 500; color: var(--coklat-mid); cursor: pointer; transition: all 0.2s; font-family: var(--font-body); }
+.filter-tab:hover { border-color: var(--kunyit); color: var(--kunyit); }
+.filter-tab.active { background: var(--bata); color: white; border-color: var(--bata); }
+.products-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1.25rem; }
+
+/* --- HOW IT WORKS --- */
+.how-section { padding: 5rem 0; background: var(--malam); margin: 5rem 0; position: relative; overflow: hidden; }
+.how-section::before { content:''; position:absolute; top:-200px; right:-200px; width:600px; height:600px; border-radius:50%; background:radial-gradient(circle,rgba(200,105,10,0.12) 0%,transparent 70%); pointer-events:none; }
+.how-section .section-header { margin-bottom: 3.5rem; }
+.how-section .section-tag { color: var(--kunyit-mid); }
+.how-section .section-title { color: var(--krem); }
+.how-section .section-sub { color: var(--muted); }
+.how-grid { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 1rem; align-items: center; }
+.how-step { text-align: center; padding: 2.5rem 2rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-xl); transition: background 0.3s, border-color 0.3s; }
+.how-step:hover { background: rgba(255,255,255,0.07); border-color: rgba(200,105,10,0.3); }
+.how-num { font-family: var(--font-display); font-size: 3rem; font-weight: 700; color: rgba(200,105,10,0.2); line-height: 1; margin-bottom: 0.75rem; }
+.how-icon { font-size: 2rem; margin-bottom: 1rem; }
+.how-title { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; color: var(--krem); margin-bottom: 0.75rem; }
+.how-desc { font-size: 0.875rem; color: var(--muted); line-height: 1.65; font-weight: 300; }
+.how-connector { font-size: 1.5rem; color: rgba(200,105,10,0.4); text-align: center; font-weight: 300; }
+
+/* --- TRUST --- */
+.trust-section { padding: 3rem 0; background: var(--krem-dark); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.trust-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 2rem; }
+.trust-item { display: flex; align-items: center; gap: 1rem; }
+.trust-icon { font-size: 1.75rem; }
+.trust-text { display: flex; flex-direction: column; gap: 0.15rem; }
+.trust-text strong { font-size: 0.9rem; font-weight: 600; color: var(--malam); }
+.trust-text span { font-size: 0.78rem; color: var(--muted); }
+
+/* --- RESPONSIVE --- */
+@media (max-width: 1100px) {
+  .categories-grid { grid-template-columns: repeat(3,1fr); }
+  .stores-grid { grid-template-columns: repeat(2,1fr); }
+  .products-grid { grid-template-columns: repeat(3,1fr); }
+  .trust-grid { grid-template-columns: repeat(2,1fr); }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
+}
+@media (max-width: 900px) {
+  .hero-inner { grid-template-columns: 1fr; text-align: center; gap: 3rem; }
+  .hero-badge, .hero-search, .hero-tags { margin-left: auto; margin-right: auto; }
+  .hero-desc { margin-left: auto; margin-right: auto; }
+  .hero-stats { justify-content: center; }
+  .hero-visual { height: 320px; }
+  .main-card { width: 260px; }
+  .categories-grid { grid-template-columns: repeat(2,1fr); }
+  .products-grid { grid-template-columns: repeat(2,1fr); }
+  .how-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+  .how-connector { transform: rotate(90deg); }
+  .section-row { flex-direction: column; align-items: flex-start; }
+  .nav-links, .nav-user-btn { display: none; }
+}
+@media (max-width: 600px) {
+  .categories-grid { grid-template-columns: 1fr 1fr; }
+  .products-grid { grid-template-columns: 1fr 1fr; }
+  .stores-grid { grid-template-columns: 1fr; }
+  .trust-grid { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .hero-visual { display: none; }
+  .cart-drawer { width: 100%; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .footer-bottom { flex-direction: column; gap: 0.5rem; text-align: center; }
+  .toast-container { bottom: 1rem; right: 1rem; left: 1rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar"></nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-pattern"></div>
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-content">
+        <div class="hero-badge anim-fadeup stagger-1">
+          <span class="hero-badge-dot"></span>
+          Kini tersedia di Bali &amp; Jawa
+        </div>
+        <h1 class="hero-title anim-fadeup stagger-2">
+          Sarana Sembahyang,<br>
+          <em>Satu Ketukan</em> dari<br>
+          Tanganmu
+        </h1>
+        <p class="hero-desc anim-fadeup stagger-3">
+          Marketplace khusus perlengkapan sembahyang Hindu — temukan toko terdekat, cek harga transparan, dan pesan canang hingga dulang langsung ke pintu rumahmu.
+        </p>
+        <div class="hero-search anim-fadeup stagger-4">
+          <div class="hero-search-icon">🔍</div>
+          <input type="text" class="hero-search-input" placeholder="Cari canang sari, dulang, bokor..." id="heroSearch" autocomplete="off"/>
+          <button class="hero-search-btn" onclick="goToShopSearch()">Cari</button>
+        </div>
+        <div class="hero-tags anim-fadeup stagger-5">
+          <span class="hero-tag-label">Populer:</span>
+          <a href="#" class="hero-tag">Canang Sari</a>
+          <a href="#" class="hero-tag">Dupa</a>
+          <a href="#" class="hero-tag">Banten Pejati</a>
+          <a href="#" class="hero-tag">Dulang</a>
+        </div>
+        <div class="hero-stats anim-fadeup stagger-6">
+          <div class="hero-stat"><span class="hero-stat-num">500+</span><span class="hero-stat-label">Penjual Aktif</span></div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat"><span class="hero-stat-num">30rb+</span><span class="hero-stat-label">Pengguna</span></div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat"><span class="hero-stat-num">4.9★</span><span class="hero-stat-label">Rating</span></div>
+        </div>
+      </div>
+
+      <div class="hero-visual anim-fadeup stagger-3">
+        <div class="hero-visual-card main-card">
+          <div class="card-header-color"></div>
+          <div class="card-body-preview">
+            <div class="mini-store-row">
+              <span class="mini-store-emoji">🏪</span>
+              <div class="mini-store-info"><span class="mini-store-name">Toko Merta Sari</span><span class="mini-store-dist">📍 0.3 km</span></div>
+              <span class="mini-store-open">Buka</span>
+            </div>
+            <div class="mini-store-row">
+              <span class="mini-store-emoji">🌺</span>
+              <div class="mini-store-info"><span class="mini-store-name">Bu Wayan Banten</span><span class="mini-store-dist">📍 0.8 km</span></div>
+              <span class="mini-store-open">Buka</span>
+            </div>
+            <div class="mini-products">
+              <div class="mini-prod">🌸<span>Canang</span><b>5rb</b></div>
+              <div class="mini-prod">🪔<span>Dupa</span><b>8.5rb</b></div>
+              <div class="mini-prod">🏺<span>Bokor</span><b>185rb</b></div>
+            </div>
+          </div>
+        </div>
+        <div class="hero-visual-card float-card-1"><span>🛒</span> Ditambahkan ke keranjang!</div>
+        <div class="hero-visual-card float-card-2"><span>📍</span> 12 toko ditemukan dekatmu</div>
+        <div class="hero-visual-card float-card-3"><span>⚡</span> Kirim 30 menit</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="categories-section">
+  <div class="container">
+    <div class="section-header reveal"><div class="section-tag">Jelajahi Kategori</div><h2 class="section-title">Semua Kebutuhan Sembahyang</h2></div>
+    <div class="categories-grid">
+      <a href="#" class="cat-card cat-1 reveal stagger-1"><div class="cat-emoji">🌸</div><div class="cat-info"><div class="cat-name">Sesajen &amp; Canang</div><div class="cat-count">1.200+ produk</div></div><div class="cat-arrow">→</div></a>
+      <a href="#" class="cat-card cat-2 reveal stagger-2"><div class="cat-emoji">🪔</div><div class="cat-info"><div class="cat-name">Dupa &amp; Lilin</div><div class="cat-count">340+ produk</div></div><div class="cat-arrow">→</div></a>
+      <a href="#" class="cat-card cat-3 reveal stagger-3"><div class="cat-emoji">🏺</div><div class="cat-info"><div class="cat-name">Dulang &amp; Bokor</div><div class="cat-count">260+ produk</div></div><div class="cat-arrow">→</div></a>
+      <a href="#" class="cat-card cat-4 reveal stagger-4"><div class="cat-emoji">👘</div><div class="cat-info"><div class="cat-name">Pakaian Adat</div><div class="cat-count">95+ produk</div></div><div class="cat-arrow">→</div></a>
+      <a href="#" class="cat-card cat-5 reveal stagger-5"><div class="cat-emoji">🥭</div><div class="cat-info"><div class="cat-name">Taledan &amp; Buah</div><div class="cat-count">180+ produk</div></div><div class="cat-arrow">→</div></a>
+    </div>
+  </div>
+</section>
+
+<!-- NEARBY STORES -->
+<section class="nearby-section">
+  <div class="container">
+    <div class="section-row">
+      <div class="section-header reveal"><div class="section-tag">📍 Dekat Lokasimu</div><h2 class="section-title">Toko Terdekat</h2><p class="section-sub">Ditemukan 12 toko dalam radius 5 km dari kamu</p></div>
+      <a href="#" class="btn btn-outline reveal">Lihat Semua Toko →</a>
+    </div>
+    <div class="stores-grid" id="storesGrid"></div>
+  </div>
+</section>
+
+<!-- FEATURED PRODUCTS -->
+<section class="products-section">
+  <div class="container">
+    <div class="section-row">
+      <div class="section-header reveal"><div class="section-tag">🛍️ Pilihan Hari Ini</div><h2 class="section-title">Produk Terpopuler</h2></div>
+      <div class="product-filter-tabs reveal" id="filterTabs">
+        <button class="filter-tab active" data-cat="all">Semua</button>
+        <button class="filter-tab" data-cat="sesajen">Sesajen</button>
+        <button class="filter-tab" data-cat="perlengkapan">Perlengkapan</button>
+        <button class="filter-tab" data-cat="pakaian">Pakaian</button>
+      </div>
+    </div>
+    <div class="products-grid" id="productsGrid"></div>
+    <div style="text-align:center;margin-top:2.5rem" class="reveal">
+      <a href="#" class="btn btn-primary btn-lg">Lihat Semua Produk →</a>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section">
+  <div class="container">
+    <div class="section-header reveal" style="text-align:center"><div class="section-tag">Cara Kerja</div><h2 class="section-title">Tiga Langkah Mudah</h2><p class="section-sub">Dari buka aplikasi hingga barang di tangan, hanya butuh beberapa menit.</p></div>
+    <div class="how-grid">
+      <div class="how-step reveal stagger-1"><div class="how-num">01</div><div class="how-icon">📍</div><h3 class="how-title">Buka &amp; Izinkan Lokasi</h3><p class="how-desc">Sistem otomatis mendeteksi posisimu dan menampilkan toko perlengkapan sembahyang terdekat dalam radius pilihanmu.</p></div>
+      <div class="how-connector reveal stagger-2">→</div>
+      <div class="how-step reveal stagger-3"><div class="how-num">02</div><div class="how-icon">🛒</div><h3 class="how-title">Pilih &amp; Pesan</h3><p class="how-desc">Cari produk yang kamu butuhkan, cek harga transparan, dan tambahkan ke keranjang. Proses checkout hanya beberapa klik.</p></div>
+      <div class="how-connector reveal stagger-4">→</div>
+      <div class="how-step reveal stagger-5"><div class="how-num">03</div><div class="how-icon">🙏</div><h3 class="how-title">Terima &amp; Sembahyang</h3><p class="how-desc">Kurir mengantarkan pesananmu dalam waktu cepat. Kamu bisa fokus sembahyang dengan tenang.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BANNER -->
+<section class="trust-section">
+  <div class="container">
+    <div class="trust-grid">
+      <div class="trust-item reveal stagger-1"><div class="trust-icon">🛡️</div><div class="trust-text"><strong>Terpercaya &amp; Aman</strong><span>Semua penjual terverifikasi</span></div></div>
+      <div class="trust-item reveal stagger-2"><div class="trust-icon">⚡</div><div class="trust-text"><strong>Pengiriman Kilat</strong><span>Dalam 30–60 menit ke rumahmu</span></div></div>
+      <div class="trust-item reveal stagger-3"><div class="trust-icon">💰</div><div class="trust-text"><strong>Harga Transparan</strong><span>Tidak ada biaya tersembunyi</span></div></div>
+      <div class="trust-item reveal stagger-4"><div class="trust-icon">🔄</div><div class="trust-text"><strong>Mudah Dikembalikan</strong><span>Garansi kepuasan 24 jam</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="footer"></footer>
+
+<!-- CART DRAWER (injected by JS) -->
+
+<script>
+'use strict';
+
+/* ============================================================
+   APP STATE
+   ============================================================ */
+const App = {
+  cart: JSON.parse(localStorage.getItem('lu_cart') || '[]'),
+  wishlist: JSON.parse(localStorage.getItem('lu_wishlist') || '[]'),
+  user: { name: 'Ketut', initials: 'KS' },
+  saveCart() { localStorage.setItem('lu_cart', JSON.stringify(this.cart)); this.updateCartUI(); },
+  saveWishlist() { localStorage.setItem('lu_wishlist', JSON.stringify(this.wishlist)); },
+  getCartCount() { return this.cart.reduce((s,i) => s+i.qty, 0); },
+  getCartTotal() { return this.cart.reduce((s,i) => s+(i.price*i.qty), 0); },
+  addToCart(product) {
+    const ex = this.cart.find(i => i.id === product.id);
+    if (ex) ex.qty++; else this.cart.push({...product, qty:1});
+    this.saveCart();
+    Toast.show(product.name + ' ditambahkan ke keranjang 🛒', 'success');
+  },
+  removeFromCart(id) { this.cart = this.cart.filter(i => i.id !== id); this.saveCart(); },
+  updateQty(id, delta) {
+    const item = this.cart.find(i => i.id === id);
+    if (!item) return;
+    item.qty += delta;
+    if (item.qty <= 0) this.removeFromCart(id); else this.saveCart();
+  },
+  toggleWishlist(id) {
+    const idx = this.wishlist.indexOf(id);
+    if (idx > -1) this.wishlist.splice(idx,1); else this.wishlist.push(id);
+    this.saveWishlist();
+    return this.wishlist.includes(id);
+  },
+  updateCartUI() {
+    const badge = document.getElementById('cartBadge');
+    const count = this.getCartCount();
+    if (badge) { badge.textContent = count; badge.style.display = count > 0 ? 'flex' : 'none'; }
+    CartDrawer.render();
+  }
+};
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+const Toast = {
+  container: null,
+  init() { this.container = document.createElement('div'); this.container.className = 'toast-container'; document.body.appendChild(this.container); },
+  show(message, type='info', duration=3000) {
+    if (!this.container) this.init();
+    const icons = {success:'✅', error:'❌', info:'ℹ️'};
+    const t = document.createElement('div');
+    t.className = 'toast toast-' + type;
+    t.innerHTML = '<span>' + icons[type] + '</span><span>' + message + '</span>';
+    this.container.appendChild(t);
+    setTimeout(() => { t.classList.add('toast-out'); setTimeout(() => t.remove(), 300); }, duration);
+  }
+};
+
+/* ============================================================
+   CART DRAWER
+   ============================================================ */
+const CartDrawer = {
+  init() {
+    document.getElementById('cartOverlay')?.addEventListener('click', () => this.close());
+    document.getElementById('cartCloseBtn')?.addEventListener('click', () => this.close());
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') this.close(); });
+    this.render();
+  },
+  open() { document.getElementById('cartOverlay')?.classList.add('open'); document.getElementById('cartDrawer')?.classList.add('open'); document.body.style.overflow = 'hidden'; this.render(); },
+  close() { document.getElementById('cartOverlay')?.classList.remove('open'); document.getElementById('cartDrawer')?.classList.remove('open'); document.body.style.overflow = ''; },
+  render() {
+    const body = document.getElementById('cartBody');
+    const footer = document.getElementById('cartFooter');
+    if (!body) return;
+    const cart = App.cart;
+    if (!cart.length) {
+      body.innerHTML = '<div class="cart-empty"><div class="empty-icon">🛒</div><p>Keranjangmu masih kosong.<br>Temukan produk sesajen yang kamu butuhkan.</p><a href="#" class="btn btn-primary" onclick="CartDrawer.close()">Mulai Belanja</a></div>';
+      if (footer) footer.style.display = 'none'; return;
+    }
+    if (footer) footer.style.display = 'block';
+    body.innerHTML = cart.map(item => `
+      <div class="cart-item">
+        <div class="cart-item-img">${item.emoji||'🌸'}</div>
+        <div class="cart-item-info">
+          <div class="cart-item-name">${item.name}</div>
+          <div class="cart-item-store">${item.store||'Toko'}</div>
+          <div class="qty-control">
+            <button class="qty-btn" onclick="App.updateQty('${item.id}',-1);CartDrawer.render()">−</button>
+            <span class="qty-num">${item.qty}</span>
+            <button class="qty-btn" onclick="App.updateQty('${item.id}',1);CartDrawer.render()">+</button>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between">
+          <button onclick="App.removeFromCart('${item.id}');CartDrawer.render()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;transition:color 0.2s" onmouseover="this.style.color='var(--bata)'" onmouseout="this.style.color='var(--muted)'">✕</button>
+          <div class="cart-item-price">${formatRupiah(item.price*item.qty)}</div>
+        </div>
+      </div>`).join('');
+    const totalEl = document.getElementById('cartTotal');
+    if (totalEl) totalEl.textContent = formatRupiah(App.getCartTotal());
+  }
+};
+
+/* ============================================================
+   SCROLL REVEAL
+   ============================================================ */
+const ScrollReveal = {
+  init() {
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+  }
+};
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+function formatRupiah(n) { return 'Rp ' + n.toLocaleString('id-ID'); }
+function debounce(fn, delay) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), delay); }; }
+
+/* ============================================================
+   PRODUCT & STORE DATA
+   ============================================================ */
+const PRODUCTS = [
+  { id:'p1', name:'Canang Sari Harian', category:'sesajen', price:5000, emoji:'🌸', rating:4.9, reviews:312, store:'Toko Merta Sari', storeId:'s1', distance:0.3, badge:'Terlaris', badgeType:'bata', description:'Canang sari untuk persembahyangan harian, dibuat dari bunga segar pilihan.' },
+  { id:'p2', name:'Dupa Harum Pandan', category:'sesajen', price:8500, emoji:'🪔', rating:4.7, reviews:198, store:'Toko Merta Sari', storeId:'s1', distance:0.3, badge:null, description:'Dupa alami beraroma pandan asli Bali.' },
+  { id:'p3', name:'Taledan Buah Segar', category:'sesajen', price:22000, emoji:'🥭', rating:4.8, reviews:87, store:'Bu Wayan Banten', storeId:'s2', distance:0.8, badge:'Baru', badgeType:'kunyit', description:'Taledan berisi buah-buahan segar pilihan.' },
+  { id:'p4', name:'Bokor Kuningan Ukir', category:'perlengkapan', price:185000, emoji:'🏺', rating:4.9, reviews:54, store:'Bu Wayan Banten', storeId:'s2', distance:0.8, badge:null, description:'Bokor kuningan dengan ukiran tradisional Bali.' },
+  { id:'p5', name:'Dulang Kayu Jati', category:'perlengkapan', price:320000, emoji:'🪵', rating:5.0, reviews:29, store:'Kerajinan Oka', storeId:'s3', distance:1.2, badge:'Premium', badgeType:'emas', description:'Dulang kayu jati asli dengan finishing natural.' },
+  { id:'p6', name:'Pakaian Adat Lengkap (Pria)', category:'pakaian', price:450000, emoji:'👘', rating:4.6, reviews:41, store:'Busana Dewata', storeId:'s4', distance:1.5, badge:null, description:'Set lengkap pakaian adat Bali pria.' },
+  { id:'p7', name:'Banten Pejati Lengkap', category:'sesajen', price:75000, emoji:'🌺', rating:4.8, reviews:163, store:'Bu Wayan Banten', storeId:'s2', distance:0.8, badge:'Populer', badgeType:'pandan', description:'Banten pejati siap pakai untuk berbagai upacara.' },
+  { id:'p8', name:'Lilin Minyak Kelapa', category:'sesajen', price:12000, emoji:'🕯️', rating:4.5, reviews:77, store:'Toko Merta Sari', storeId:'s1', distance:0.3, badge:null, description:'Lilin dari minyak kelapa murni.' },
+];
+
+const STORES = [
+  { id:'s1', name:'Toko Merta Sari', emoji:'🏪', address:'Jl. Gatot Subroto No. 14, Denpasar', distance:0.3, rating:4.9, reviews:412, products:48, categories:['Canang','Dupa','Sesajen'], open:true, openHours:'06.00 – 20.00', color:'linear-gradient(135deg,#B84A2A,#D4790A)' },
+  { id:'s2', name:'Bu Wayan Banten', emoji:'🌺', address:'Jl. Teuku Umar No. 32, Denpasar', distance:0.8, rating:4.8, reviews:287, products:63, categories:['Banten','Sesajen','Dulang'], open:true, openHours:'05.30 – 18.00', color:'linear-gradient(135deg,#2D6A4F,#3D8B65)' },
+  { id:'s3', name:'Kerajinan Oka', emoji:'🏺', address:'Jl. Monkey Forest, Ubud', distance:1.2, rating:5.0, reviews:89, products:22, categories:['Dulang','Bokor','Perlengkapan'], open:false, openHours:'08.00 – 17.00', color:'linear-gradient(135deg,#5C3D1E,#8B6040)' },
+  { id:'s4', name:'Busana Dewata', emoji:'👘', address:'Jl. Hayam Wuruk No. 7, Denpasar', distance:1.5, rating:4.6, reviews:134, products:38, categories:['Pakaian Adat','Aksesoris'], open:true, openHours:'09.00 – 21.00', color:'linear-gradient(135deg,#9A4F0A,#C97B2A)' },
+];
+
+/* ============================================================
+   RENDER HELPERS
+   ============================================================ */
+function getCategoryBg(cat) {
+  return { sesajen:'linear-gradient(135deg,#FDF0DC,#F5EDD8)', perlengkapan:'linear-gradient(135deg,#FAE9E4,#F5EDD8)', pakaian:'linear-gradient(135deg,#E8F5EE,#E0F0E8)' }[cat] || 'var(--krem-dark)';
+}
+
+function renderProductCard(p) {
+  const isWished = App.wishlist.includes(p.id);
+  const safeP = JSON.stringify(p).replace(/"/g,'&quot;');
+  return `
+  <div class="product-card reveal">
+    <div class="product-card-img" style="background:${getCategoryBg(p.category)}">
+      <span style="font-size:3rem">${p.emoji}</span>
+      <button class="wishlist-btn ${isWished?'active':''}" onclick="handleWishlist('${p.id}',this)">${isWished?'❤️':'🤍'}</button>
+      ${p.badge ? `<div style="position:absolute;top:0.75rem;left:0.75rem"><span class="badge badge-${p.badgeType}">${p.badge}</span></div>` : ''}
+    </div>
+    <div class="product-card-body">
+      <div class="product-store">📍 ${p.store} · ${p.distance} km</div>
+      <div class="product-name">${p.name}</div>
+      <div class="product-rating"><span class="stars">★</span> ${p.rating} <span>(${p.reviews} ulasan)</span></div>
+      <div class="product-footer">
+        <div class="product-price">${formatRupiah(p.price)}</div>
+        <button class="product-add-btn" onclick="App.addToCart(${safeP})">+</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function handleWishlist(id, btn) {
+  const isNow = App.toggleWishlist(id);
+  btn.textContent = isNow ? '❤️' : '🤍';
+  btn.classList.toggle('active', isNow);
+  Toast.show(isNow ? 'Ditambahkan ke wishlist' : 'Dihapus dari wishlist', 'info');
+}
+
+/* ============================================================
+   NAVBAR INJECT
+   ============================================================ */
+function injectNavbar() {
+  const nav = document.getElementById('navbar');
+  if (!nav) return;
+  nav.innerHTML = `
+  <div class="container">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">Lavanya <span>Upakara</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="active">Beranda</a></li>
+        <li><a href="pages/shop.html">Belanja</a></li>
+        <li><a href="pages/stores.html">Toko</a></li>
+        <li><a href="pages/orders.html">Pesanan</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="nav-cart-btn" id="navCartBtn" title="Keranjang">🛒<span class="cart-badge" id="cartBadge" style="display:none">0</span></button>
+        <div class="nav-user-btn"><div class="nav-avatar">${App.user.initials}</div><span class="nav-avatar-name">${App.user.name}</span></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ============================================================
+   CART DRAWER INJECT
+   ============================================================ */
+function injectCartDrawer() {
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `
+  <div class="cart-overlay" id="cartOverlay"></div>
+  <aside class="cart-drawer" id="cartDrawer">
+    <div class="cart-drawer-header">
+      <div class="cart-title">Keranjang Belanja 🛒</div>
+      <button class="cart-close" id="cartCloseBtn">✕</button>
+    </div>
+    <div class="cart-body" id="cartBody"></div>
+    <div class="cart-footer" id="cartFooter" style="display:none">
+      <div class="cart-subtotal"><span class="cart-subtotal-label">Total Belanja</span><span class="cart-subtotal-value" id="cartTotal">Rp 0</span></div>
+      <div style="font-size:0.75rem;color:var(--muted)">Belum termasuk ongkos kirim</div>
+      <button class="cart-checkout-btn" onclick="window.location.href='pages/checkout.html'">🙏 Lanjut Checkout →</button>
+    </div>
+  </aside>`;
+  document.body.appendChild(wrap.children[0]);
+  document.body.appendChild(wrap.children[0]);
+}
+
+/* ============================================================
+   FOOTER INJECT
+   ============================================================ */
+function injectFooter() {
+  const footer = document.getElementById('footer');
+  if (!footer) return;
+  footer.innerHTML = `
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="nav-logo">Lavanya <span>Upakara</span></div>
+        <p>Marketplace khusus sarana persembahyangan Hindu. Mendekatkan umat dengan penjual terpercaya di sekitarnya.</p>
+      </div>
+      <div><div class="footer-col-title">Produk</div><ul class="footer-links"><li><a href="#">Sesajen &amp; Canang</a></li><li><a href="#">Dupa &amp; Lilin</a></li><li><a href="#">Dulang &amp; Bokor</a></li><li><a href="#">Pakaian Adat</a></li></ul></div>
+      <div><div class="footer-col-title">Perusahaan</div><ul class="footer-links"><li><a href="#">Tentang Kami</a></li><li><a href="#">Daftar sebagai Penjual</a></li><li><a href="#">Blog</a></li><li><a href="#">Karier</a></li></ul></div>
+      <div><div class="footer-col-title">Bantuan</div><ul class="footer-links"><li><a href="#">Pusat Bantuan</a></li><li><a href="#">Syarat &amp; Ketentuan</a></li><li><a href="#">Kebijakan Privasi</a></li><li><a href="#">Hubungi Kami</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><span>© 2025 Lavanya Upakara. Dibuat dengan 🙏 untuk umat Hindu.</span><span>Om Swastyastu</span></div>
+  </div>`;
+}
+
+/* ============================================================
+   PAGE INIT
+   ============================================================ */
+function goToShopSearch() {
+  const q = document.getElementById('heroSearch')?.value.trim();
+  window.location.href = q ? 'pages/shop.html?q=' + encodeURIComponent(q) : 'pages/shop.html';
+}
+
+function renderStores() {
+  const grid = document.getElementById('storesGrid');
+  if (!grid) return;
+  grid.innerHTML = STORES.map((s,i) => `
+    <a href="pages/stores.html#${s.id}" class="store-card reveal stagger-${i+1}">
+      <div class="store-card-banner" style="background:${s.color}">
+        <span style="font-size:3rem">${s.emoji}</span>
+        <span style="position:absolute;top:0.75rem;right:0.75rem;background:${s.open?'rgba(45,106,79,0.9)':'rgba(168,56,32,0.85)'};color:white;font-size:0.7rem;padding:0.25rem 0.6rem;border-radius:100px;font-weight:600">${s.open?'Buka':'Tutup'}</span>
+      </div>
+      <div class="store-card-body">
+        <div class="store-name">${s.name}</div>
+        <div style="margin-bottom:0.5rem"><span class="store-dist-badge">📍 ${s.distance} km</span></div>
+        <div class="store-meta"><span>★ ${s.rating}</span><span>·</span><span>${s.products} produk</span><span>·</span><span>${s.openHours}</span></div>
+      </div>
+    </a>`).join('');
+  ScrollReveal.init();
+}
+
+let activeFilter = 'all';
+function renderProducts(cat = 'all') {
+  const grid = document.getElementById('productsGrid');
+  if (!grid) return;
+  const filtered = cat === 'all' ? PRODUCTS : PRODUCTS.filter(p => p.category === cat);
+  grid.innerHTML = filtered.map(p => renderProductCard(p)).join('');
+  ScrollReveal.init();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  injectNavbar();
+  injectCartDrawer();
+  injectFooter();
+
+  document.getElementById('navCartBtn')?.addEventListener('click', () => CartDrawer.open());
+  CartDrawer.init();
+  Toast.init();
+
+  window.addEventListener('scroll', () => {
+    document.querySelector('.navbar')?.classList.toggle('scrolled', window.scrollY > 10);
+  });
+
+  document.getElementById('heroSearch')?.addEventListener('keydown', e => { if (e.key === 'Enter') goToShopSearch(); });
+
+  renderStores();
+  renderProducts();
+
+  document.querySelectorAll('.filter-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter = btn.dataset.cat;
+      renderProducts(activeFilter);
+    });
+  });
+
+  ScrollReveal.init();
+  App.updateCartUI();
+});
+</script>
+</body>
+</html>

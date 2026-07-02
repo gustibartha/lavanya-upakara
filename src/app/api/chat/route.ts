@@ -1,5 +1,5 @@
 import { google } from "@ai-sdk/google";
-import { streamText, Message } from "ai";
+import { streamText, CoreMessage } from "ai";
 import { products } from "@/lib/data";
 
 // Set max duration for Vercel Edge/Serverless functions
@@ -35,7 +35,7 @@ Aturan Penting:
     const result = streamText({
       model: google("gemini-2.5-flash"),
       system: systemPrompt,
-      messages: messages as Message[],
+      messages: messages as CoreMessage[],
       temperature: 0.7,
     });
 

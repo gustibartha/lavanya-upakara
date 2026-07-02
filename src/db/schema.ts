@@ -1,32 +1,27 @@
 // ==========================================
-// Lavanya Upakara — Drizzle ORM Schema
-// Sesuai PRD Section 6: Database Schema
+// Lavanya Upakara — Drizzle ORM Schema (PostgreSQL)
 // ==========================================
 
-import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
-import { relations } from "drizzle-orm";
-
-// --- USER ---
-// Managed by Better Auth (see auth-schema.ts)
-// Tables: user, session, account, verification
+import { pgTable, text, integer, doublePrecision, boolean, timestamp } from "drizzle-orm/pg-core";
+import { relations, sql } from "drizzle-orm";
 
 // --- STORE (Toko) ---
-export const stores = sqliteTable("stores", {
+export const stores = pgTable("stores", {
   id: text("id").primaryKey(),
   nama_toko: text("nama_toko").notNull(),
   alamat: text("alamat").notNull(),
-  latitude: real("latitude").notNull(),
-  longitude: real("longitude").notNull(),
+  latitude: doublePrecision("latitude").notNull(),
+  longitude: doublePrecision("longitude").notNull(),
   kategori: text("kategori").notNull(), // JSON array stored as text
   emoji: text("emoji").notNull().default("🏪"),
   telepon: text("telepon"),
   jam_buka: text("jam_buka").default("08:00"),
   jam_tutup: text("jam_tutup").default("18:00"),
-  created_at: text("created_at").notNull().default("(datetime('now'))"),
+  created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
 });
 
 // --- PRODUCT (Barang) ---
-export const products = sqliteTable("products", {
+export const products = pgTable("products", {
   id: text("id").primaryKey(),
   slug: text("slug").notNull().unique(),
   store_id: text("store_id")
@@ -39,15 +34,15 @@ export const products = sqliteTable("products", {
   deskripsi: text("deskripsi").notNull(),
   emoji: text("emoji").notNull().default("📦"),
   bg_color: text("bg_color").notNull().default("#FDF0DC"),
-  populer: integer("populer", { mode: "boolean" }).default(false),
+  populer: boolean("populer").default(false),
   stok: integer("stok").default(100),
-  created_at: text("created_at").notNull().default("(datetime('now'))"),
+  created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
 });
 
 // --- ORDER (Pesanan) ---
-export const orders = sqliteTable("orders", {
+export const orders = pgTable("orders", {
   id: text("id").primaryKey(),
-  user_id: text("user_id").notNull(), // references Better Auth user.id
+  user_id: text("user_id").notNull(),
   store_id: text("store_id")
     .notNull()
     .references(() => stores.id),
@@ -62,11 +57,11 @@ export const orders = sqliteTable("orders", {
   shipping_method: text("shipping_method"), // pickup | delivery
   shipping_service: text("shipping_service"), // gojek | grab | paxel
   catatan: text("catatan"),
-  created_at: text("created_at").notNull().default("(datetime('now'))"),
+  created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
 });
 
 // --- ORDER_ITEM (Detail Pesanan) ---
-export const orderItems = sqliteTable("order_items", {
+export const orderItems = pgTable("order_items", {
   id: text("id").primaryKey(),
   order_id: text("order_id")
     .notNull()

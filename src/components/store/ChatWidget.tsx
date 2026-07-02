@@ -143,7 +143,7 @@ export function ChatWidget() {
                   <div className="chat-avatar bg-kunyit/20 text-kunyit"><Bot size={16} /></div>
                 )}
                 <div className="chat-bubble-content">
-                  <div className={`chat-bubble ${msg.role === 'user' ? 'bg-bata text-white' : 'bg-gray-100 text-malam'}`}>
+                  <div className={`chat-bubble ${msg.role === 'user' ? 'bg-[#B84A2A] text-white' : 'bg-gray-100 text-[#1C1917]'}`}>
                     {msg.content}
                   </div>
                   
@@ -171,7 +171,7 @@ export function ChatWidget() {
             {isTyping && (
               <div className="chat-bubble-wrapper assistant">
                 <div className="chat-avatar bg-kunyit/20 text-kunyit"><Bot size={16} /></div>
-                <div className="chat-bubble bg-gray-100 text-malam flex gap-1 items-center px-4 py-3">
+                <div className="chat-bubble bg-gray-100 text-[#1C1917] flex gap-1 items-center px-4 py-3">
                   <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"></div>
                   <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{animationDelay: "0.2s"}}></div>
                   <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{animationDelay: "0.4s"}}></div>

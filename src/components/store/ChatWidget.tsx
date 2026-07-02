@@ -11,16 +11,26 @@ export function ChatWidget() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const chatHelper: any = useChat({
-    initialMessages: [
-      {
-        id: "welcome",
-        role: "assistant",
-        content: "Om Swastyastu 🙏 Ada yang bisa saya bantu untuk keperluan sembahyang Anda hari ini? (Misal: 'Butuh banten Kuningan')",
-      }
-    ],
+    api: "/api/chat",
   } as any);
   
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = chatHelper;
+  const { messages, append, isLoading } = chatHelper;
+  const [input, setInput] = useState("");
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+    
+    // Kirim pesan ke API chat
+    if (append) {
+      append({ role: "user", content: input });
+    }
+    setInput("");
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

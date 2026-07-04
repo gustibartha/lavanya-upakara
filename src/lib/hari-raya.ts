@@ -17,6 +17,20 @@ export interface HariRaya {
 
 export const kalenderHariRaya: HariRaya[] = [
   // ========================
+  // TESTING HOLIDAY
+  // ========================
+  {
+    id: "testing-2026",
+    nama: "Hari Raya Purnama (Testing)",
+    emoji: "??",
+    tanggal: "2026-07-06",
+    deskripsi: "Hari pengingat untuk testing banner.",
+    banten_wajib: ["Canang Sari", "Dupa", "Pejati"],
+    makna: "Hanya untuk keperluan testing.",
+    produk_rekomendasi: ["canang-sari-harian", "dupa-cendana"],
+    warna: "#D4A820",
+  },
+  // ========================
   // GALUNGAN (2025-2026)
   // ========================
   {

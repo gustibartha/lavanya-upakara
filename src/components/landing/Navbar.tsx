@@ -59,8 +59,9 @@ export function Navbar() {
   const userName = session?.user?.name || "Guest";
 
   return (
-    <nav className={`navbar ${scrolled ? "scrolled" : ""}`} id="navbar">
-      <div className="container nav-inner">
+    <>
+      <nav className={`navbar ${scrolled ? "scrolled" : ""}`} id="navbar">
+        <div className="container nav-inner">
         <Link href="/" className="nav-logo">
           Lavanya<span>Upakara</span>
         </Link>
@@ -150,7 +151,8 @@ export function Navbar() {
             <Menu size={24} />
           </button>
         </div>
-      </div>
+        </div>
+      </nav>
 
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
@@ -203,6 +205,6 @@ export function Navbar() {
           </div>
         </div>
       )}
-    </nav>
+    </>
   );
 }

@@ -8,11 +8,13 @@ import { Testimonials } from "@/components/landing/Testimonials";
 import { Trust } from "@/components/landing/Trust";
 import { Articles } from "@/components/landing/Articles";
 import { Footer } from "@/components/landing/Footer";
+import { HariRayaBanner } from "@/components/store/HariRayaBanner";
 
 export default function Home() {
   return (
     <>
       <Navbar />
+      <HariRayaBanner />
       <Hero />
       <Categories />
       <NearbyStores />
@@ -25,4 +27,3 @@ export default function Home() {
     </>
   );
 }
-

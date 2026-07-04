@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { useCart } from "@/context/CartContext";
 import { getUpcomingHariRaya, getDaysUntil } from "@/lib/hari-raya";
-import { Bell, Menu, X } from "lucide-react";
+import { Bell, Menu, X, Loader2, User } from "lucide-react";
 
 export function Navbar() {
   const router = useRouter();
@@ -94,7 +94,9 @@ export function Navbar() {
 
           {isPending ? (
             <div className="nav-user-btn">
-              <div className="nav-avatar nav-avatar-loading">...</div>
+              <div className="nav-avatar nav-avatar-loading">
+                <Loader2 size={16} className="animate-spin" />
+              </div>
             </div>
           ) : session?.user ? (
             /* Logged in — dropdown */

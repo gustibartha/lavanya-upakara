@@ -2505,3 +2505,5 @@ footer { background: var(--malam); color: var(--muted); padding: 4rem 0 2rem; ma
 .mobile-menu-auth {
   display: flex; flex-direction: column; gap: 0.5rem; margin-top: auto;
 }
+.animate-spin { animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }

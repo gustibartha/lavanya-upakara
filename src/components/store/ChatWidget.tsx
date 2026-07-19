@@ -45,6 +45,17 @@ export function ChatWidget() {
     return { cleanText, recommendations };
   };
 
+  const renderMarkdown = (text: string) => {
+    let html = text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/\n/g, '<br/>');
+    return { __html: html };
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const userText = input.trim();
@@ -176,13 +187,17 @@ export function ChatWidget() {
                         whiteSpace: "pre-wrap",
                       }}
                     >
-                      {cleanText || (isLoading && msg.role === "assistant" && msg.content === "" ? (
+                      {cleanText ? (
+                        <div dangerouslySetInnerHTML={renderMarkdown(cleanText)} />
+                      ) : isLoading && msg.role === "assistant" && msg.content === "" ? (
                         <span style={{ display: "flex", gap: "4px", alignItems: "center" }}>
                           <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#9ca3af", animation: "bounce 1s infinite" }}></span>
                           <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#9ca3af", animation: "bounce 1s 0.2s infinite" }}></span>
                           <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#9ca3af", animation: "bounce 1s 0.4s infinite" }}></span>
                         </span>
-                      ) : cleanText)}
+                      ) : (
+                        <div dangerouslySetInnerHTML={renderMarkdown(cleanText)} />
+                      )}
                     </div>
 
                     {recommendations.length > 0 && (

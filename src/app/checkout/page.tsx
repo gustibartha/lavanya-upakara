@@ -6,6 +6,13 @@ import { authClient } from "@/lib/auth-client";
 import { formatRupiah } from "@/lib/data";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Script from "next/script";
+
+const MIDTRANS_CLIENT_KEY = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY;
+const MIDTRANS_SNAP_URL =
+  process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === "true"
+    ? "https://app.midtrans.com/snap/snap.js"
+    : "https://app.sandbox.midtrans.com/snap/snap.js";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -29,6 +36,12 @@ export default function CheckoutPage() {
   const [note, setNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState<any>(null);
+
+  // Opsi pembayaran online hanya ditawarkan kalau Client Key sudah dipasang,
+  // supaya tidak ada tombol yang menuntun ke jalan buntu.
+  const midtransReady = Boolean(MIDTRANS_CLIENT_KEY);
+  const [paymentMethod, setPaymentMethod] = useState<"cod" | "midtrans">("cod");
+  const [paymentNotice, setPaymentNotice] = useState<string | null>(null);
 
   // Fetch Provinces on mount
   useEffect(() => {
@@ -87,6 +100,72 @@ export default function CheckoutPage() {
     }
   }, [cartItems, isPending, orderSuccess, router, isInitialized]);
 
+  /**
+   * Membuka Snap untuk pesanan yang baru dibuat.
+   *
+   * Hasil dari callback Snap hanya dipakai untuk memilih kalimat yang
+   * ditampilkan. Pelunasan pesanan tetap ditentukan webhook Midtrans di
+   * server, karena callback di browser bisa dipalsukan.
+   */
+  const startMidtransPayment = async (order: { id: string }) => {
+    try {
+      const res = await fetch("/api/payments/midtrans", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ order_id: order.id }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.token) {
+        setOrderSuccess(order);
+        setPaymentNotice(
+          (data.error || "Gagal membuka halaman pembayaran") +
+            ". Pesanan Anda tersimpan dan bisa dibayar lewat menu Riwayat.",
+        );
+        return;
+      }
+
+      if (!window.snap) {
+        // snap.js gagal dimuat — jangan biarkan pembeli buntu.
+        window.location.href = data.redirect_url;
+        return;
+      }
+
+      window.snap.pay(data.token, {
+        onSuccess: () => {
+          setOrderSuccess(order);
+          setPaymentNotice(
+            "Pembayaran diterima. Status pesanan diperbarui setelah dikonfirmasi Midtrans.",
+          );
+        },
+        onPending: () => {
+          setOrderSuccess(order);
+          setPaymentNotice(
+            "Pembayaran menunggu penyelesaian. Selesaikan sesuai instruksi, status akan otomatis diperbarui.",
+          );
+        },
+        onError: () => {
+          setOrderSuccess(order);
+          setPaymentNotice(
+            "Pembayaran gagal. Pesanan tetap tersimpan dan bisa dibayar ulang lewat menu Riwayat.",
+          );
+        },
+        onClose: () => {
+          setOrderSuccess(order);
+          setPaymentNotice(
+            "Anda menutup halaman pembayaran sebelum selesai. Pesanan tersimpan dan bisa dibayar lewat menu Riwayat.",
+          );
+        },
+      });
+    } catch (error) {
+      console.error("Midtrans error:", error);
+      setOrderSuccess(order);
+      setPaymentNotice(
+        "Koneksi ke pembayaran gagal. Pesanan tersimpan dan bisa dibayar lewat menu Riwayat.",
+      );
+    }
+  };
+
   const handlePlaceOrder = async () => {
     if (!session) {
       router.push("/masuk?callbackUrl=/checkout");
@@ -129,7 +208,8 @@ export default function CheckoutPage() {
         kodepos,
         shipping_method: shippingMethod,
         shipping_service: shippingMethod === "delivery" ? shippingService : null,
-        catatan: note
+        catatan: note,
+        metode_bayar: paymentMethod
       };
 
       const response = await fetch("/api/orders", {
@@ -140,12 +220,21 @@ export default function CheckoutPage() {
 
       const data = await response.json();
 
-      if (response.ok) {
-        setOrderSuccess(data.order);
-        clearCart();
-      } else {
+      if (!response.ok) {
         alert("Gagal: " + (data.error || "Terjadi kesalahan pada server"));
+        return;
       }
+
+      // Pesanan sudah tersimpan. Keranjang boleh dikosongkan sekarang —
+      // kalau pembayaran batal, pesanannya tetap bisa dibayar dari Riwayat.
+      clearCart();
+
+      if (paymentMethod === "midtrans") {
+        await startMidtransPayment(data.order);
+        return;
+      }
+
+      setOrderSuccess(data.order);
     } catch (error) {
       console.error("Checkout error:", error);
       alert("Terjadi kesalahan koneksi");
@@ -171,9 +260,10 @@ export default function CheckoutPage() {
           Terima kasih telah memesan sarana sembahyang di Lavanya Upakara.
           Nomor pesanan Anda: <strong>{orderSuccess.id}</strong>
         </p>
+        {paymentNotice && <p className="payment-notice">{paymentNotice}</p>}
         <div className="success-actions">
-          <Link href="/" className="btn-primary">
-            Kembali ke Beranda
+          <Link href={`/riwayat/${orderSuccess.id}`} className="btn-primary">
+            Lihat Pesanan
           </Link>
           <Link href="/katalog" className="btn-ghost">
             Belanja Lagi
@@ -197,6 +287,13 @@ export default function CheckoutPage() {
 
   return (
     <div className="checkout-page py-12">
+      {midtransReady && (
+        <Script
+          src={MIDTRANS_SNAP_URL}
+          data-client-key={MIDTRANS_CLIENT_KEY}
+          strategy="afterInteractive"
+        />
+      )}
       <div className="container">
         <Link href="/katalog" className="text-bata hover:underline mb-4 inline-block">
           ← Kembali ke Katalog
@@ -368,20 +465,57 @@ export default function CheckoutPage() {
             <div className="checkout-card mt-6">
               <h2 className="card-title">💳 Metode Pembayaran</h2>
               <div className="payment-options">
-                <div className="payment-option active">
-                  <div className="payment-radio">✓</div>
+                <label
+                  className={`payment-option ${paymentMethod === "cod" ? "active" : ""}`}
+                >
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="cod"
+                    checked={paymentMethod === "cod"}
+                    onChange={() => setPaymentMethod("cod")}
+                  />
+                  <div className="payment-radio">
+                    {paymentMethod === "cod" ? "✓" : ""}
+                  </div>
                   <div className="payment-info">
                     <span className="payment-name">Bayar di Tempat (COD)</span>
                     <span className="payment-desc">Bayar tunai saat barang sampai</span>
                   </div>
-                </div>
-                <div className="payment-option disabled">
-                  <div className="payment-radio-off"></div>
-                  <div className="payment-info">
-                    <span className="payment-name">Transfer Bank / QRIS</span>
-                    <span className="payment-desc">Segera hadir (Coming Soon)</span>
+                </label>
+
+                {midtransReady ? (
+                  <label
+                    className={`payment-option ${paymentMethod === "midtrans" ? "active" : ""}`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="midtrans"
+                      checked={paymentMethod === "midtrans"}
+                      onChange={() => setPaymentMethod("midtrans")}
+                    />
+                    <div className="payment-radio">
+                      {paymentMethod === "midtrans" ? "✓" : ""}
+                    </div>
+                    <div className="payment-info">
+                      <span className="payment-name">
+                        QRIS, Transfer Bank &amp; E-Wallet
+                      </span>
+                      <span className="payment-desc">
+                        Bayar online lewat Midtrans — QRIS, VA, GoPay, ShopeePay
+                      </span>
+                    </div>
+                  </label>
+                ) : (
+                  <div className="payment-option disabled">
+                    <div className="payment-radio-off"></div>
+                    <div className="payment-info">
+                      <span className="payment-name">QRIS, Transfer Bank &amp; E-Wallet</span>
+                      <span className="payment-desc">Belum aktif di server ini</span>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>

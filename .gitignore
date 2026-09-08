@@ -44,3 +44,6 @@ next-env.d.ts
 *.db
 *.db-wal
 *.db-shm
+
+# Contoh konfigurasi tetap ikut ke repo (tidak berisi nilai rahasia)
+!.env.example

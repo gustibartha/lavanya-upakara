@@ -5,10 +5,12 @@ import Link from "next/link";
 import { formatRupiah } from "@/lib/data";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
+import { useCart } from "@/context/CartContext";
 
 export default function RiwayatPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { addToCart, setIsCartOpen } = useCart();
 
   useEffect(() => {
     fetch("/api/orders/user")
@@ -21,6 +23,32 @@ export default function RiwayatPage() {
       .catch((err) => console.error("Error fetching orders:", err))
       .finally(() => setLoading(false));
   }, []);
+
+  /**
+   * Memasukkan kembali seluruh isi pesanan lama ke keranjang.
+   * Produk yang sudah tidak ada di katalog dilewati, dan kalau ternyata
+   * tidak ada satu pun yang tersisa, pembeli diberi tahu.
+   */
+  const handleBuyAgain = (order: {
+    items?: { jumlah: number; product?: Record<string, unknown> | null }[];
+    store?: { nama_toko?: string } | null;
+  }) => {
+    let ditambahkan = 0;
+    for (const item of order.items ?? []) {
+      if (!item.product) continue;
+      addToCart(
+        { ...item.product, nama_toko: order.store?.nama_toko },
+        item.jumlah,
+      );
+      ditambahkan++;
+    }
+
+    if (ditambahkan === 0) {
+      alert("Produk pada pesanan ini sudah tidak tersedia di katalog.");
+      return;
+    }
+    setIsCartOpen(true);
+  };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -105,7 +133,12 @@ export default function RiwayatPage() {
                   <div className="order-card-footer">
                     <Link href={`/riwayat/${order.id}`} className="btn-ghost btn-sm">Detail & Tracking</Link>
                     {order.status === 'selesai' && (
-                      <button className="btn-primary btn-sm">Beli Lagi</button>
+                      <button
+                        className="btn-primary btn-sm"
+                        onClick={() => handleBuyAgain(order)}
+                      >
+                        Beli Lagi
+                      </button>
                     )}
                   </div>
                 </div>

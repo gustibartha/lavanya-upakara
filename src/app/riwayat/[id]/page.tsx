@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { formatRupiah } from "@/lib/data";
+import { MidtransPayButton } from "@/components/store/MidtransPayButton";
 import {
   Package,
   CheckCircle2,
@@ -31,6 +32,31 @@ const STATUS_STEPS: { key: OrderStatus; label: string; icon: React.ElementType; 
 
 const STATUS_ORDER: OrderStatus[] = ["menunggu", "diproses", "dikirim", "selesai"];
 
+const PAYMENT_STATUS: Record<string, { label: string; className: string }> = {
+  belum_bayar: { label: "Belum Dibayar", className: "pay-unpaid" },
+  pending: { label: "Menunggu Pembayaran", className: "pay-pending" },
+  dibayar: { label: "Lunas ✓", className: "pay-paid" },
+  gagal: { label: "Pembayaran Gagal", className: "pay-failed" },
+  kadaluarsa: { label: "Pembayaran Kedaluwarsa", className: "pay-failed" },
+  refund: { label: "Dana Dikembalikan", className: "pay-refund" },
+};
+
+/** Nama ramah untuk payment_type yang dikirim Midtrans. */
+const PAYMENT_TYPE_LABEL: Record<string, string> = {
+  qris: "QRIS",
+  bank_transfer: "Transfer Bank (VA)",
+  echannel: "Mandiri Bill",
+  permata: "Permata VA",
+  gopay: "GoPay",
+  shopeepay: "ShopeePay",
+  credit_card: "Kartu Kredit",
+  cstore: "Gerai Retail",
+  akulaku: "Akulaku",
+};
+
+/** Pesanan online yang dananya belum masuk masih boleh dibayar ulang. */
+const PAYABLE = new Set(["belum_bayar", "pending", "gagal", "kadaluarsa"]);
+
 function getStepIndex(status: OrderStatus) {
   return STATUS_ORDER.indexOf(status);
 }
@@ -42,17 +68,34 @@ export default function OrderDetailPage() {
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
+  const fetchOrder = useCallback(() => {
     if (!id) return;
+    // Rantai promise, bukan async/await, supaya tidak ada pemanggilan
+    // setState yang terlihat sinkron dari dalam efek.
     fetch(`/api/orders/${id}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.order) setOrder(data.order);
-        else setError("Pesanan tidak ditemukan");
+        else setError(data.error || "Pesanan tidak ditemukan");
       })
       .catch(() => setError("Gagal memuat data pesanan"))
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    fetchOrder();
+  }, [fetchOrder]);
+
+  /**
+   * Dipanggil setelah Snap ditutup. Status pelunasan datang dari webhook
+   * Midtrans, yang kadang tiba sesaat setelah pembeli selesai — karena itu
+   * data diambil sekali lagi beberapa detik kemudian.
+   */
+  const reloadOrder = useCallback(() => {
+    fetchOrder();
+    const timer = setTimeout(fetchOrder, 4000);
+    return () => clearTimeout(timer);
+  }, [fetchOrder]);
 
   const handleCopyId = () => {
     navigator.clipboard.writeText(id || "").then(() => {
@@ -277,7 +320,13 @@ export default function OrderDetailPage() {
                     <div>
                       <div className="order-total-label">Total Pembayaran</div>
                       <div className="order-payment-method">
-                        Bayar di Tempat (COD)
+                        {order.metode_bayar === "midtrans"
+                          ? PAYMENT_TYPE_LABEL[order.payment_type as string] ||
+                            "Pembayaran Online"
+                          : "Bayar di Tempat (COD)"}
+                      </div>
+                      <div className={`order-payment-status ${PAYMENT_STATUS[order.status_bayar]?.className ?? ""}`}>
+                        {PAYMENT_STATUS[order.status_bayar]?.label ?? "Belum Dibayar"}
                       </div>
                     </div>
                     <div className="order-grand-total">{formatRupiah(order.total_harga)}</div>
@@ -286,6 +335,18 @@ export default function OrderDetailPage() {
 
                 {/* Actions */}
                 <div className="order-detail-actions">
+                  {order.metode_bayar === "midtrans" &&
+                    PAYABLE.has(order.status_bayar) && (
+                      <MidtransPayButton
+                        orderId={order.id}
+                        onFinished={reloadOrder}
+                        label={
+                          order.status_bayar === "pending"
+                            ? "💳 Lanjutkan Pembayaran"
+                            : "💳 Bayar Sekarang"
+                        }
+                      />
+                    )}
                   {order.status === "selesai" && (
                     <Link href="/katalog" className="btn btn-primary w-full">
                       🛍️ Pesan Lagi

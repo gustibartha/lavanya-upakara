@@ -57,6 +57,18 @@ export const orders = pgTable("orders", {
   shipping_method: text("shipping_method"), // pickup | delivery
   shipping_service: text("shipping_service"), // gojek | grab | paxel
   catatan: text("catatan"),
+
+  // --- Pembayaran ---
+  metode_bayar: text("metode_bayar").notNull().default("cod"), // cod | midtrans
+  // belum_bayar | pending | dibayar | gagal | kadaluarsa | refund
+  status_bayar: text("status_bayar").notNull().default("belum_bayar"),
+  // Referensi yang dikirim ke Midtrans. Dibuat ulang tiap percobaan bayar,
+  // karena Midtrans menolak order_id yang sudah pernah dipakai.
+  midtrans_order_id: text("midtrans_order_id"),
+  midtrans_transaction_id: text("midtrans_transaction_id"),
+  payment_type: text("payment_type"), // qris | bank_transfer | gopay | dst
+  paid_at: timestamp("paid_at", { mode: "string" }),
+
   created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
 });
 

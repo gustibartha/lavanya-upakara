@@ -3,6 +3,8 @@
 import db from "@/db";
 import { orders, orderItems, products, stores } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export async function GET(
   _request: Request,
@@ -15,6 +17,13 @@ export async function GET(
       return Response.json({ error: "ID pesanan diperlukan" }, { status: 400 });
     }
 
+    // Respons ini memuat alamat pengantaran dan data pembayaran, jadi hanya
+    // pemilik pesanan yang boleh membacanya.
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     // Get order
     const [order] = await db
       .select()
@@ -23,6 +32,11 @@ export async function GET(
       .limit(1);
 
     if (!order) {
+      return Response.json({ error: "Pesanan tidak ditemukan" }, { status: 404 });
+    }
+
+    if (order.user_id !== session.user.id) {
+      // 404, bukan 403 — supaya keberadaan sebuah ID pesanan tidak bocor.
       return Response.json({ error: "Pesanan tidak ditemukan" }, { status: 404 });
     }
 

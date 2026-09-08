@@ -31,12 +31,12 @@ export function Articles() {
   return (
     <section className="articles-section container" id="artikel">
       <div className="section-row">
-        <div className="section-header anim-fadeup" style={{ marginBottom: 0 }}>
+        <div className="section-header anim-fadeup" data-reveal="left" style={{ marginBottom: 0 }}>
           <div className="section-tag">Blog & Edukasi</div>
           <h2 className="section-title">Artikel Terbaru</h2>
           <p className="section-sub">Tingkatkan pemahaman spiritual dan temukan panduan upacara di sini.</p>
         </div>
-        <Link href="#" className="btn btn-outline anim-fadeup stagger-1">
+        <Link href="#" className="btn btn-outline anim-fadeup stagger-1" data-reveal="right">
           Lihat Semua Artikel
         </Link>
       </div>

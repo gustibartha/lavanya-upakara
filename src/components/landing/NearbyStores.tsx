@@ -11,12 +11,12 @@ export function NearbyStores() {
   return (
     <section className="nearby-section container" id="toko">
       <div className="section-row">
-        <div className="section-header anim-fadeup" style={{ marginBottom: 0 }}>
+        <div className="section-header anim-fadeup" data-reveal="left" style={{ marginBottom: 0 }}>
           <div className="section-tag">Lokasi Terdekat</div>
           <h2 className="section-title">Toko di Sekitarmu</h2>
           <p className="section-sub">Temukan perlengkapan upacara dari toko terdekat dengan harga terbaik.</p>
         </div>
-        <Link href="/toko" className="btn btn-outline anim-fadeup stagger-1">
+        <Link href="/toko" className="btn btn-outline anim-fadeup stagger-1" data-reveal="right">
           Lihat Semua Peta
         </Link>
       </div>

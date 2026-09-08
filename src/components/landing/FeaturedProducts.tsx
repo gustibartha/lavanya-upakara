@@ -16,7 +16,7 @@ export function FeaturedProducts() {
   return (
     <section className="products-section container" id="produk">
       <div className="section-row">
-        <div className="section-header anim-fadeup" style={{ marginBottom: 0 }}>
+        <div className="section-header anim-fadeup" data-reveal="left" style={{ marginBottom: 0 }}>
           <div className="section-tag">Rekomendasi</div>
           <h2 className="section-title">Pilihan Produk Terbaik</h2>
           <p className="section-sub">Produk-produk dengan rating tinggi dan harga bersahabat.</p>

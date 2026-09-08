@@ -1,0 +1,582 @@
+/* ============================================================
+   LAVANYA UPAKARA — MOTION SYSTEM
+   Nuansa Bali: jepun (frangipani), asap dupa, kilau emas, poleng,
+   dan irama gamelan sebagai dasar timing animasi.
+   ============================================================ */
+
+:root {
+  /* Kurva gerak — lembut, "mengalun" seperti tabuh */
+  --ease-alun:  cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-tabuh: cubic-bezier(0.34, 1.4, 0.44, 1);
+  --ease-halus: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Irama stagger (gamelan beat) */
+  --beat: 90ms;
+}
+
+/* ============================================================
+   1. SCROLL REVEAL
+   Menggantikan .anim-fadeup yang jalan saat load (percuma untuk
+   section di bawah layar) dengan reveal saat elemen terlihat.
+   Tanpa JS, animasi lama tetap jalan sebagai fallback.
+   ============================================================ */
+
+/* Reveal memakai properti `translate` + `scale` (bukan `transform`) supaya
+   transform milik hover kartu tetap hidup — kalau pakai `transform`, aturan
+   reveal yang lebih spesifik akan mematikan efek hover setelah in-view. */
+html[data-motion] .anim-fadeup,
+html[data-motion] [data-reveal] {
+  animation: none !important;
+  opacity: 0;
+  translate: var(--rv-x, 0) var(--rv-y, 30px);
+  scale: var(--rv-s, 0.985);
+  filter: blur(var(--rv-blur, 0px));
+  transition:
+    opacity 0.85s var(--ease-alun),
+    translate 0.85s var(--ease-alun),
+    scale 0.85s var(--ease-alun),
+    filter 0.85s var(--ease-alun);
+  transition-delay: var(--rv-delay, 0s);
+}
+
+html[data-motion] .anim-fadeup.in-view,
+html[data-motion] [data-reveal].in-view {
+  opacity: 1;
+  translate: 0 0;
+  scale: 1;
+  filter: none;
+}
+
+/* Arah reveal */
+html[data-motion] [data-reveal="left"]  { --rv-x: -42px; --rv-y: 0; }
+html[data-motion] [data-reveal="right"] { --rv-x: 42px;  --rv-y: 0; }
+html[data-motion] [data-reveal="scale"] { --rv-y: 14px;  --rv-s: 0.9; }
+html[data-motion] [data-reveal="blur"]  { --rv-y: 18px;  --rv-blur: 10px; }
+html[data-motion] [data-reveal="fade"]  { --rv-y: 0;     --rv-s: 1; }
+
+/* Stagger lama dipetakan ke delay reveal (irama gamelan) */
+html[data-motion] .stagger-1 { --rv-delay: calc(var(--beat) * 1); }
+html[data-motion] .stagger-2 { --rv-delay: calc(var(--beat) * 2); }
+html[data-motion] .stagger-3 { --rv-delay: calc(var(--beat) * 3); }
+html[data-motion] .stagger-4 { --rv-delay: calc(var(--beat) * 4); }
+html[data-motion] .stagger-5 { --rv-delay: calc(var(--beat) * 5); }
+html[data-motion] .stagger-6 { --rv-delay: calc(var(--beat) * 6); }
+
+/* ============================================================
+   2. HERO — JUDUL MUNCUL PER KATA
+   ============================================================ */
+
+.hero-title .word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.45em) rotate(2deg);
+  animation: wordRise 0.9s var(--ease-alun) forwards;
+  animation-delay: calc(var(--w) * 70ms + 120ms);
+}
+.hero-title .word em { font-style: italic; color: var(--kunyit); }
+
+@keyframes wordRise {
+  to { opacity: 1; transform: none; }
+}
+
+/* Garis emas menyapu di bawah kata sorotan */
+.hero-title .word-accent { position: relative; }
+.hero-title .word-accent::after {
+  content: "";
+  position: absolute;
+  left: 0.05em;
+  right: 0.05em;
+  bottom: 0.02em;
+  height: 0.09em;
+  border-radius: 100px;
+  background: linear-gradient(90deg, transparent, var(--emas), var(--kunyit-mid), transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: accentSweep 1.1s var(--ease-alun) forwards;
+  animation-delay: 1s;
+}
+@keyframes accentSweep {
+  0%   { transform: scaleX(0); opacity: 0; }
+  60%  { opacity: 1; }
+  100% { transform: scaleX(1); opacity: 0.85; }
+}
+
+/* ============================================================
+   3. ASAP DUPA (incense smoke) — latar hero
+   ============================================================ */
+
+.dupa-smoke {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.dupa-wisp {
+  position: absolute;
+  bottom: -12%;
+  left: var(--x, 50%);
+  width: var(--w, 180px);
+  height: var(--w, 180px);
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 60%,
+    rgba(232, 145, 58, 0.16) 0%,
+    rgba(212, 168, 32, 0.09) 40%,
+    transparent 72%);
+  filter: blur(26px);
+  opacity: 0;
+  animation: wispRise var(--dur, 18s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+@keyframes wispRise {
+  0%   { transform: translate3d(0, 0, 0) scale(0.55); opacity: 0; }
+  12%  { opacity: 0.75; }
+  50%  { transform: translate3d(var(--drift, 40px), -55vh, 0) scale(1.15); }
+  78%  { opacity: 0.35; }
+  100% { transform: translate3d(calc(var(--drift, 40px) * -0.6), -110vh, 0) scale(1.7); opacity: 0; }
+}
+
+/* ============================================================
+   4. HUJAN JEPUN (frangipani petals)
+   ============================================================ */
+
+.jepun-field {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  overflow: hidden;
+}
+.jepun {
+  position: absolute;
+  top: -8vh;
+  left: var(--x, 50%);
+  width: var(--size, 22px);
+  height: var(--size, 22px);
+  opacity: 0;
+  animation:
+    jepunFall var(--dur, 16s) linear infinite,
+    jepunSpin calc(var(--dur, 16s) / 3) ease-in-out infinite;
+  animation-delay: var(--delay, 0s), var(--delay, 0s);
+}
+.jepun svg { width: 100%; height: 100%; display: block; }
+
+@keyframes jepunFall {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  6%   { opacity: var(--op, 0.55); }
+  25%  { transform: translate3d(var(--sway, 60px), 28vh, 0); }
+  50%  { transform: translate3d(calc(var(--sway, 60px) * -0.8), 55vh, 0); }
+  75%  { transform: translate3d(var(--sway, 60px), 82vh, 0); }
+  92%  { opacity: var(--op, 0.55); }
+  100% { transform: translate3d(0, 112vh, 0); opacity: 0; }
+}
+@keyframes jepunSpin {
+  0%   { rotate: 0deg; }
+  50%  { rotate: 180deg; }
+  100% { rotate: 360deg; }
+}
+
+/* ============================================================
+   5. SCROLL PROGRESS — benang emas
+   ============================================================ */
+
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  transform-origin: 0 50%;
+  transform: scaleX(var(--p, 0));
+  background: linear-gradient(90deg, var(--bata), var(--kunyit), var(--emas), var(--kunyit-mid));
+  box-shadow: 0 0 12px rgba(212, 168, 32, 0.55);
+  z-index: 400;
+  pointer-events: none;
+}
+
+/* ============================================================
+   6. PEMBATAS ORNAMEN — ukiran & motif poleng
+   ============================================================ */
+
+.ornament-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  color: var(--kunyit);
+}
+.ornament-line {
+  height: 1px;
+  flex: 1;
+  max-width: 260px;
+  background: linear-gradient(90deg, transparent, var(--border), rgba(200, 105, 10, 0.45));
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 1s var(--ease-alun) 0.1s;
+}
+.ornament-line:last-child {
+  background: linear-gradient(90deg, rgba(200, 105, 10, 0.45), var(--border), transparent);
+  transform-origin: left;
+}
+.ornament-divider.in-view .ornament-line { transform: scaleX(1); }
+
+.ornament-mark {
+  font-size: 1.05rem;
+  line-height: 1;
+  color: var(--emas);
+  animation: markBreathe 4.5s ease-in-out infinite;
+}
+@keyframes markBreathe {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.75; }
+  50%      { transform: scale(1.18) rotate(45deg); opacity: 1; }
+}
+
+/* Pita poleng (kain hitam-putih sakral) yang bergeser pelan */
+.poleng-strip {
+  height: 6px;
+  width: 100%;
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--malam) 0 14px,
+    #F6F1E6 14px 28px
+  );
+  background-size: 28px 100%;
+  opacity: 0.5;
+  animation: polengSlide 6s linear infinite;
+}
+@keyframes polengSlide {
+  to { background-position: 28px 0; }
+}
+
+/* ============================================================
+   7. KILAU EMAS pada tag section
+   ============================================================ */
+
+/* Kilau prada — sepotong cahaya emas menyapu huruf saat section muncul.
+   Di luar animasi, background-position berhenti di area kunyit solid,
+   jadi teks tetap terbaca normal. */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .section-tag {
+    background-image: linear-gradient(
+      100deg,
+      currentColor 0%,
+      currentColor 40%,
+      #F2C64B 50%,
+      currentColor 60%,
+      currentColor 100%
+    );
+    background-size: 300% 100%;
+    background-position: 100% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .in-view .section-tag,
+  .section-tag.in-view {
+    animation: emasText 1.6s var(--ease-halus) 0.3s both;
+  }
+}
+@keyframes emasText {
+  from { background-position: 100% 0; }
+  to   { background-position: 0% 0; }
+}
+
+/* Sapuan kilau untuk elemen bertekstur padat (tombol) */
+@keyframes emasSweep {
+  0%   { left: -80%; opacity: 0; }
+  22%  { opacity: 1; }
+  100% { left: 130%; opacity: 0; }
+}
+
+/* ============================================================
+   8. MICRO-INTERACTION KARTU
+   ============================================================ */
+
+.cat-card,
+.store-card,
+.product-card,
+.article-card,
+.testi-card {
+  transition:
+    transform 0.45s var(--ease-alun),
+    box-shadow 0.45s var(--ease-alun),
+    border-color 0.3s var(--ease-halus);
+}
+.cat-card:hover,
+.store-card:hover,
+.article-card:hover { transform: translateY(-8px) scale(1.015); }
+.product-card:hover { transform: translateY(-6px); }
+.testi-card:hover   { transform: translateY(-5px) rotate(-0.4deg); }
+
+/* Sorotan cahaya mengikuti kursor (nilai --mx/--my dipasok JS) */
+.store-card,
+.article-card { position: relative; }
+
+.cat-card::before,
+.store-card::before,
+.article-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    220px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(255, 255, 255, 0.16),
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-halus);
+  pointer-events: none;
+  z-index: 2;
+}
+.cat-card:hover::before,
+.store-card:hover::before,
+.article-card:hover::before { opacity: 1; }
+
+/* Panah kategori meluncur */
+.cat-card .cat-arrow {
+  transition: transform 0.4s var(--ease-tabuh), background 0.3s;
+}
+.cat-card:hover .cat-arrow { transform: translateX(4px) scale(1.12); }
+
+/* Gambar bernapas saat hover */
+.category-card-img,
+.article-img { transition: transform 0.7s var(--ease-alun); }
+.cat-card:hover .category-card-img { transform: scale(1.08) rotate(1.5deg); }
+.article-card:hover .article-img   { transform: scale(1.07); }
+
+/* Tombol tambah produk berputar */
+.product-add-btn { transition: transform 0.35s var(--ease-tabuh), background 0.25s; }
+.product-card:hover .product-add-btn { transform: rotate(90deg) scale(1.1); }
+
+/* Wishlist berdetak */
+.wishlist-btn { transition: transform 0.3s var(--ease-tabuh); }
+.wishlist-btn:hover  { transform: scale(1.22); }
+.wishlist-btn:active { transform: scale(0.88); }
+
+/* Tombol utama — kilau menyapu */
+.btn-primary,
+.hero-search-btn {
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::after,
+.hero-search-btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -80%;
+  width: 55%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: skewX(-20deg);
+  pointer-events: none;
+}
+.btn-primary:hover::after,
+.hero-search-btn:hover::after {
+  animation: emasSweep 0.9s var(--ease-halus);
+}
+
+/* Tag pencarian populer */
+.hero-tag { transition: transform 0.3s var(--ease-tabuh), background 0.2s, color 0.2s; }
+.hero-tag:hover { transform: translateY(-3px) scale(1.05); }
+
+/* ============================================================
+   9. CARA KERJA — langkah & konektor mengalir
+   ============================================================ */
+
+.how-step {
+  position: relative;
+  overflow: hidden;
+  transition: background 0.4s, border-color 0.4s, transform 0.45s var(--ease-alun);
+}
+.how-step:hover { transform: translateY(-6px); }
+
+.how-step .how-icon {
+  display: inline-block;
+  transition: transform 0.5s var(--ease-tabuh);
+}
+.how-step:hover .how-icon { transform: translateY(-6px) scale(1.18); }
+
+.how-step .how-num {
+  transition: color 0.4s var(--ease-halus), transform 0.5s var(--ease-alun);
+}
+.how-step:hover .how-num { color: rgba(200, 105, 10, 0.45); transform: scale(1.06); }
+
+/* Cahaya pelita menyapu di dalam kartu langkah */
+.how-step::after {
+  content: "";
+  position: absolute;
+  inset: -40% -10%;
+  background: radial-gradient(circle at 50% 0%, rgba(232, 145, 58, 0.18), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.5s var(--ease-halus);
+  pointer-events: none;
+}
+.how-step:hover::after { opacity: 1; }
+
+/* `translate` dipakai agar rotate(90deg) versi mobile tetap utuh. */
+.how-connector { animation: connectorFlow 2.6s var(--ease-halus) infinite; }
+@keyframes connectorFlow {
+  0%, 100% { translate: -5px 0; opacity: 0.35; }
+  50%      { translate: 5px 0;  opacity: 1; }
+}
+
+/* Aura hangat di section gelap berdenyut lembut */
+.how-section::before { animation: auraBreathe 12s ease-in-out infinite; }
+@keyframes auraBreathe {
+  0%, 100% { transform: scale(1);    opacity: 0.85; }
+  50%      { transform: scale(1.22); opacity: 1; }
+}
+
+/* ============================================================
+   10. TRUST — ikon muncul berurutan
+   ============================================================ */
+
+.trust-item .trust-icon {
+  display: inline-block;
+  transition: transform 0.5s var(--ease-tabuh);
+}
+.trust-item:hover .trust-icon { transform: translateY(-5px) rotate(-8deg) scale(1.15); }
+
+.trust-grid.in-view .trust-icon { animation: iconPop 0.75s var(--ease-tabuh) both; }
+.trust-grid.in-view .trust-item:nth-child(1) .trust-icon { animation-delay: 0.05s; }
+.trust-grid.in-view .trust-item:nth-child(2) .trust-icon { animation-delay: 0.17s; }
+.trust-grid.in-view .trust-item:nth-child(3) .trust-icon { animation-delay: 0.29s; }
+.trust-grid.in-view .trust-item:nth-child(4) .trust-icon { animation-delay: 0.41s; }
+@keyframes iconPop {
+  0%   { transform: scale(0.3) rotate(-25deg); opacity: 0; }
+  60%  { transform: scale(1.18) rotate(6deg);  opacity: 1; }
+  100% { transform: none; opacity: 1; }
+}
+
+/* ============================================================
+   11. TESTIMONI — bintang menyala
+   ============================================================ */
+
+.testi-card.in-view .testi-stars {
+  animation: starGlow 1.4s var(--ease-halus) 0.25s both;
+}
+@keyframes starGlow {
+  0%   { opacity: 0.25; filter: none; letter-spacing: 0.35em; }
+  55%  { opacity: 1; filter: drop-shadow(0 0 8px rgba(212, 168, 32, 0.7)); }
+  100% { opacity: 1; filter: none; letter-spacing: normal; }
+}
+
+/* ============================================================
+   12. NAVBAR — menyusut & garis emas
+   ============================================================ */
+
+.navbar {
+  transition:
+    height 0.35s var(--ease-alun),
+    background 0.35s var(--ease-halus),
+    box-shadow 0.35s var(--ease-halus),
+    backdrop-filter 0.35s;
+}
+.navbar.scrolled { backdrop-filter: blur(14px) saturate(1.15); }
+
+.nav-logo { display: inline-block; transition: transform 0.4s var(--ease-tabuh); }
+.nav-logo:hover { transform: scale(1.04); }
+
+.nav-links a { position: relative; }
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 0.85rem;
+  right: 0.85rem;
+  bottom: 0.15rem;
+  height: 1.5px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--kunyit), var(--emas));
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s var(--ease-alun);
+}
+.nav-links a:hover::after { transform: scaleX(1); transform-origin: left; }
+
+/* ============================================================
+   13. HERO VISUAL — parallax lembut
+   ============================================================ */
+
+/* Parallax memakai `transform`, karena `translate` sudah dipakai reveal. */
+.hero-visual {
+  transform: translate3d(calc(var(--px, 0) * 14px), calc(var(--py, 0) * 14px), 0);
+  transition: transform 0.6s var(--ease-halus);
+}
+.float-card-1,
+.float-card-2,
+.float-card-3 { transition: box-shadow 0.4s var(--ease-halus); }
+.float-card-1:hover,
+.float-card-2:hover,
+.float-card-3:hover { box-shadow: var(--shadow-warm), var(--shadow-lg); }
+
+/* Sinar bergerak pada header kartu utama */
+.card-header-color::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.28) 45%, transparent 70%);
+  transform: translateX(-100%);
+  animation: cardShine 5.5s var(--ease-halus) infinite;
+  z-index: 1;
+}
+@keyframes cardShine {
+  0%, 55%   { transform: translateX(-100%); }
+  85%, 100% { transform: translateX(120%); }
+}
+
+.mini-store-row,
+.mini-prod { transition: background 0.3s var(--ease-halus), transform 0.3s var(--ease-alun); }
+.mini-store-row:hover,
+.mini-prod:hover { transform: translateX(3px); }
+
+/* Badge "Buka" berdenyut seperti nadi */
+.mini-store-open { animation: badgePulseSoft 2.8s ease-in-out infinite; }
+@keyframes badgePulseSoft {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(40, 92, 66, 0.35); }
+  60%      { box-shadow: 0 0 0 7px rgba(40, 92, 66, 0); }
+}
+
+/* ============================================================
+   14. ANGKA STATISTIK
+   ============================================================ */
+
+.hero-stat-num { font-variant-numeric: tabular-nums; }
+.hero-stat { transition: transform 0.4s var(--ease-tabuh); }
+.hero-stat:hover { transform: translateY(-3px); }
+
+/* ============================================================
+   15. LATAR HERO — kori agung bernapas
+   ============================================================ */
+
+.hero-bg-pattern { animation: koriBreathe 16s ease-in-out infinite; }
+@keyframes koriBreathe {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50%      { opacity: 1;    transform: scale(1.06); }
+}
+
+/* ============================================================
+   16. HORMATI PREFERENSI PENGGUNA
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-motion] .anim-fadeup,
+  html[data-motion] [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
+  .jepun-field,
+  .dupa-smoke { display: none; }
+  .hero-title .word { opacity: 1; animation: none; }
+  .hero-title .word-accent::after { transform: scaleX(1); opacity: 0.85; animation: none; }
+
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

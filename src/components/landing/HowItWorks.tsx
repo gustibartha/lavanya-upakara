@@ -8,26 +8,26 @@ export function HowItWorks() {
           <p className="section-sub">Tidak perlu keliling pasar. Kami yang hubungkan kamu dengan toko terdekat.</p>
         </div>
 
-        <div className="how-grid anim-fadeup stagger-2">
-          <div className="how-step">
+        <div className="how-grid">
+          <div className="how-step anim-fadeup stagger-1" data-reveal="scale">
             <div className="how-num">1</div>
             <div className="how-icon">📍</div>
             <h3 className="how-title">Cari & Temukan</h3>
             <p className="how-desc">Pilih perlengkapan atau cari toko terdekat dari lokasimu saat ini.</p>
           </div>
-          
+
           <div className="how-connector">➔</div>
-          
-          <div className="how-step">
+
+          <div className="how-step anim-fadeup stagger-3" data-reveal="scale">
             <div className="how-num">2</div>
             <div className="how-icon">🛍️</div>
             <h3 className="how-title">Pesan & Bayar</h3>
             <p className="how-desc">Pesan melalui sistem kami dengan harga transparan tanpa biaya tersembunyi.</p>
           </div>
-          
+
           <div className="how-connector">➔</div>
-          
-          <div className="how-step">
+
+          <div className="how-step anim-fadeup stagger-5" data-reveal="scale">
             <div className="how-num">3</div>
             <div className="how-icon">🛵</div>
             <h3 className="how-title">Ambil / Antar</h3>
@@ -38,4 +38,3 @@ export function HowItWorks() {
     </section>
   );
 }
-

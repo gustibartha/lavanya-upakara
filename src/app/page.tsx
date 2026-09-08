@@ -9,6 +9,7 @@ import { Trust } from "@/components/landing/Trust";
 import { Articles } from "@/components/landing/Articles";
 import { Footer } from "@/components/landing/Footer";
 import { HariRayaBanner } from "@/components/store/HariRayaBanner";
+import { OrnamentDivider, PolengStrip } from "@/components/motion/Ornament";
 
 export default function Home() {
   return (
@@ -17,8 +18,12 @@ export default function Home() {
       <HariRayaBanner />
       <Hero />
       <Categories />
+      <div className="container">
+        <OrnamentDivider />
+      </div>
       <NearbyStores />
       <FeaturedProducts />
+      <PolengStrip />
       <HowItWorks />
       <Testimonials />
       <Trust />

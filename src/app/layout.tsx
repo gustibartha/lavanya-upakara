@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import "./motion.css";
 
 const cormorant = Cormorant_Garamond({
   weight: ["400", "500", "600", "700"],
@@ -23,6 +24,9 @@ export const metadata: Metadata = {
 import { CartProvider } from "@/context/CartContext";
 import { CartSidebar } from "@/components/store/CartSidebar";
 import { ChatWidget } from "@/components/store/ChatWidget";
+import { MotionProvider } from "@/components/motion/MotionProvider";
+import { JepunRain } from "@/components/motion/JepunRain";
+import { ScrollProgress } from "@/components/motion/Ornament";
 
 export default function RootLayout({
   children,
@@ -36,10 +40,13 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col font-sans">
         <CartProvider>
+          <ScrollProgress />
+          <JepunRain />
           {children}
           <CartSidebar />
           <ChatWidget />
         </CartProvider>
+        <MotionProvider />
       </body>
     </html>
   );

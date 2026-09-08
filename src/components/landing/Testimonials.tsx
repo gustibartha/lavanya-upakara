@@ -38,7 +38,7 @@ export function Testimonials() {
 
       <div className="testimonials-grid">
         {testimonials.map((testi, i) => (
-          <div key={testi.id} className={`testi-card anim-fadeup stagger-${i + 1}`}>
+          <div key={testi.id} className={`testi-card anim-fadeup stagger-${i + 1}`} data-reveal="blur">
             <div className="testi-stars">
               {"★".repeat(testi.rating)}
             </div>

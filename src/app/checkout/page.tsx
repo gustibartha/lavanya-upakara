@@ -274,7 +274,7 @@ export default function CheckoutPage() {
                     <input
                       type="text"
                       className="checkout-input"
-                      placeholder="Contoh: Jl. Raya Ubud No. 12"
+                      placeholder="Contoh: Jl. Daksinapati Raya No. 12, Rawamangun"
                       value={jalan}
                       onChange={(e) => setJalan(e.target.value)}
                     />

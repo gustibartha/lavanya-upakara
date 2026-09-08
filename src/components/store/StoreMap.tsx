@@ -19,10 +19,10 @@ export function StoreMap({ selectedStore, onSelectStore }: StoreMapProps) {
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
 
-    // Initialize map centered on Denpasar, Bali
+    // Initialize map centered on Jabodetabek
     const map = L.map(mapRef.current, {
-      center: [-8.65, 115.22],
-      zoom: 12,
+      center: [-6.30, 106.82],
+      zoom: 10,
       zoomControl: true,
     });
 

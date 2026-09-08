@@ -21,7 +21,7 @@ export function Hero() {
         <div className="hero-text">
           <div className="hero-badge anim-fadeup">
             <div className="hero-badge-dot"></div>
-            Marketplace Sarana Upacara #1 di Bali
+            Marketplace Sarana Upacara #1 di Jabodetabek
           </div>
           <h1 className="hero-title">
             {TITLE_WORDS.map((word, i) => (
@@ -84,7 +84,7 @@ export function Hero() {
               <div className="mini-store-row">
                 <img src="/images/stores/default-store.png" alt="Toko" className="mini-store-img" />
                 <div className="mini-store-info">
-                  <span className="mini-store-name">Baturiti Upakara</span>
+                  <span className="mini-store-name">Dharma Upakara</span>
                   <span className="mini-store-dist">1.2 km dari lokasimu</span>
                 </div>
                 <span className="mini-store-open">Buka</span>

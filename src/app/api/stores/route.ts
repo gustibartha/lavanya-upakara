@@ -1,5 +1,5 @@
 // GET /api/stores — List all stores, optionally sorted by proximity
-// Query params: ?lat=-8.65&lng=115.22&radius=5
+// Query params: ?lat=-6.21&lng=106.85&radius=5
 
 import db from "@/db";
 import { stores } from "@/db/schema";

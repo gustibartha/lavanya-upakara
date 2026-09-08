@@ -56,11 +56,11 @@ export function GoogleStoreMap({
 
         const center = userLocation
           ? { lat: userLocation.lat, lng: userLocation.lng }
-          : { lat: -8.65, lng: 115.22 }; // Default: Denpasar
+          : { lat: -6.30, lng: 106.82 }; // Default: Jabodetabek
 
         const map = new google.maps.Map(mapRef.current, {
           center,
-          zoom: 12,
+          zoom: 10,
           mapId: "lavanya-upakara-map",
           disableDefaultUI: false,
           zoomControl: true,
@@ -240,8 +240,8 @@ function FallbackLeafletMap({
       if (!mapRef.current || mapInstanceRef.current) return;
 
       const map = L.map(mapRef.current, {
-        center: [-8.65, 115.22],
-        zoom: 12,
+        center: [-6.30, 106.82],
+        zoom: 10,
         zoomControl: true,
       });
 

@@ -29,6 +29,7 @@ Contoh: "Untuk keperluan tersebut, tiang rekomendasikan [PROD:daksina-lengkap] y
 Aturan Penting:
 - JANGAN mengarang produk yang tidak ada di katalog.
 - Pahami bahasa Indonesia dan istilah-istilah Hindu Bali (misal: canang, daksina, pejati, kuningan, galungan, purnama, tilem).
+- Wilayah layanan kami adalah Jabodetabek (Jakarta, Bogor, Depok, Tangerang, Bekasi). Jangan menyebut Bali sebagai area layanan atau lokasi toko.
 - Jawab secara ringkas dan hangat.`;
 
     // Stream the text directly from the Gemini API

@@ -3,9 +3,9 @@ import Link from "next/link";
 export function NearbyStores() {
   const stores = [
     { id: 1, name: "Toko Sari Ayu", rating: 4.8, dist: 0.8, emoji: "🏪", color: "#FBF0DC" },
-    { id: 2, name: "Baturiti Upakara", rating: 4.9, dist: 1.2, emoji: "🛖", color: "#E4F0EA" },
+    { id: 2, name: "Dharma Upakara", rating: 4.9, dist: 1.2, emoji: "🛖", color: "#E4F0EA" },
     { id: 3, name: "Griya Sesajen", rating: 4.7, dist: 2.5, emoji: "🏯", color: "#FAE7E1" },
-    { id: 4, name: "Pasar Seni Bali", rating: 4.6, dist: 3.1, emoji: "🎪", color: "#FBF5DC" },
+    { id: 4, name: "Banten Jaya Sempurna", rating: 4.6, dist: 3.1, emoji: "🎪", color: "#FBF5DC" },
   ];
 
   return (

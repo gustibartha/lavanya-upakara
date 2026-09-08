@@ -14,9 +14,11 @@ import { useCart } from "@/context/CartContext";
 export default function KatalogContent() {
   const searchParams = useSearchParams();
   const initialKategori = searchParams.get("kategori") || "semua";
+  // Kata kunci dari kolom pencarian di hero dikirim lewat `q`.
+  const initialQuery = searchParams.get("q") || "";
 
   const [activeKategori, setActiveKategori] = useState(initialKategori);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
 
   const { addToCart } = useCart();
 

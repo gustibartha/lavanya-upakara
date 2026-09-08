@@ -2,9 +2,29 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useCart } from "@/context/CartContext";
+import { getProductBySlug, getStoreById } from "@/lib/data";
+import { useFavorites } from "@/lib/use-favorites";
 
 export function FeaturedProducts() {
   const [filter, setFilter] = useState("Semua");
+  const { addToCart } = useCart();
+
+  // Belum ada wishlist di server, jadi tombol hati ini menyimpan pilihan
+  // di perangkat pembeli saja — daripada dibiarkan mati.
+  const { favorites, toggleFavorite } = useFavorites();
+
+  /**
+   * Kartu di bawah memakai data ringkas untuk tampilan, tapi keranjang harus
+   * berisi produk asli — checkout mengirim id-nya ke server dan pesanan akan
+   * ditolak kalau id itu tidak ada di katalog.
+   */
+  const handleAddToCart = (slug: string) => {
+    const product = getProductBySlug(slug);
+    if (!product) return;
+    const store = getStoreById(product.store_id);
+    addToCart({ ...product, nama_toko: store?.nama_toko }, 1);
+  };
 
   const products = [
     { id: 1, slug: "canang-sari-harian", name: "Canang Sari Segar", price: 15000, store: "Toko Sari Ayu", rating: 4.9, sold: "2.1k", image: "/images/products/canang-sari-harian.png", color: "#FBF0DC" },
@@ -47,7 +67,19 @@ export function FeaturedProducts() {
       <div className="products-grid" id="productsGrid">
         {products.map((prod, i) => (
           <div key={prod.id} className={`product-card anim-fadeup stagger-${(i % 5) + 1}`}>
-            <button className="wishlist-btn">🤍</button>
+            <button
+              className="wishlist-btn"
+              onClick={() => toggleFavorite(prod.slug)}
+              aria-pressed={favorites.includes(prod.slug)}
+              aria-label={
+                favorites.includes(prod.slug)
+                  ? `Hapus ${prod.name} dari favorit`
+                  : `Simpan ${prod.name} ke favorit`
+              }
+              title={favorites.includes(prod.slug) ? "Hapus dari favorit" : "Simpan ke favorit"}
+            >
+              {favorites.includes(prod.slug) ? "❤️" : "🤍"}
+            </button>
             <Link href={`/katalog/${prod.slug}`}>
               <div className="product-card-img" style={{ background: prod.color, padding: 0 }}>
                 <img src={prod.image} alt={prod.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -64,7 +96,14 @@ export function FeaturedProducts() {
               </div>
               <div className="product-footer">
                 <span className="product-price">Rp {prod.price.toLocaleString('id-ID')}</span>
-                <button className="product-add-btn">+</button>
+                <button
+                  className="product-add-btn"
+                  onClick={() => handleAddToCart(prod.slug)}
+                  aria-label={`Tambah ${prod.name} ke keranjang`}
+                  title="Tambah ke keranjang"
+                >
+                  +
+                </button>
               </div>
             </div>
           </div>

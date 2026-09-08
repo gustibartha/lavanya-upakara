@@ -23,6 +23,7 @@ interface OrderInput {
   shipping_method: string;
   shipping_service?: string;
   catatan?: string;
+  metode_bayar?: string;
 }
 
 export async function POST(request: Request) {
@@ -58,6 +59,9 @@ export async function POST(request: Request) {
       itemsWithPrice.push({ ...item, harga_satuan: product.harga });
     }
 
+    // Hanya dua metode yang dikenal; nilai lain diperlakukan sebagai COD.
+    const metodeBayar = body.metode_bayar === "midtrans" ? "midtrans" : "cod";
+
     const orderId = `order-${randomUUID().slice(0, 8)}`;
 
     // Insert order
@@ -76,6 +80,8 @@ export async function POST(request: Request) {
       shipping_method: body.shipping_method || "pickup",
       shipping_service: body.shipping_service || null,
       catatan: body.catatan || null,
+      metode_bayar: metodeBayar,
+      status_bayar: "belum_bayar",
     });
 
     // Insert order items
@@ -95,6 +101,8 @@ export async function POST(request: Request) {
           id: orderId,
           total_harga: totalHarga,
           status: "menunggu",
+          metode_bayar: metodeBayar,
+          status_bayar: "belum_bayar",
           items: itemsWithPrice.length,
         },
         message: "Pesanan berhasil dibuat! 🙏",

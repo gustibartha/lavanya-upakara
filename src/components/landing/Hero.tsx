@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CountUp } from "@/components/motion/CountUp";
 import { DupaSmoke } from "@/components/motion/DupaSmoke";
 import { HeroShowcase } from "@/components/landing/HeroShowcase";
+import { HeroSearch } from "@/components/landing/HeroSearch";
 
 /** Judul hero dipecah per kata agar bisa naik satu-satu seperti irama tabuh. */
 const TITLE_WORDS: { text: string; accent?: boolean; em?: boolean }[] = [
@@ -40,11 +41,7 @@ export function Hero() {
             Platform khusus perlengkapan sembahyang Hindu. Temukan toko terdekat, pesan langsung, dan gunakan fitur Asisten AI untuk membantu merencanakan kebutuhan upacara Anda.
           </p>
 
-          <div className="hero-search anim-fadeup stagger-2">
-            <span className="hero-search-icon">🔍</span>
-            <input type="text" className="hero-search-input" placeholder="Cari canang, dupa, buah..." />
-            <button className="hero-search-btn">Cari</button>
-          </div>
+          <HeroSearch />
 
           <div className="hero-tags anim-fadeup stagger-3">
             <span className="hero-tag-label">Pencarian Populer:</span>

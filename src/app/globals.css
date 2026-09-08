@@ -2513,3 +2513,55 @@ footer { background: var(--malam); color: var(--muted); padding: 4rem 0 2rem; ma
 @media (max-width: 600px) {
   .articles-grid { grid-template-columns: 1fr; }
 }
+
+/* --- PILIHAN PEMBAYARAN (radio asli disembunyikan) --- */
+.payment-option { position: relative; }
+.payment-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+/* Lingkaran kiri baru terisi ketika opsinya dipilih. */
+.payment-option:not(.active) .payment-radio {
+  background: transparent;
+  border: 2px solid var(--border);
+}
+.payment-option:not(.disabled):hover { border-color: var(--kunyit); }
+.payment-option input[type="radio"]:focus-visible ~ .payment-radio {
+  outline: 2px solid var(--kunyit);
+  outline-offset: 2px;
+}
+
+.payment-notice {
+  max-width: 520px;
+  margin: 1.25rem auto 0;
+  padding: 0.85rem 1.1rem;
+  border-radius: 12px;
+  background: var(--kunyit-lite);
+  border: 1px solid rgba(200, 105, 10, 0.25);
+  color: var(--coklat);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* --- STATUS PEMBAYARAN DI DETAIL PESANAN --- */
+.order-payment-status {
+  display: inline-block;
+  margin-top: 0.35rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 100px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+.order-payment-status.pay-unpaid  { background: var(--krem-dark); color: var(--coklat-mid); }
+.order-payment-status.pay-pending { background: var(--emas-lite); color: #8A6D0B; }
+.order-payment-status.pay-paid    { background: var(--pandan-lite); color: var(--pandan); }
+.order-payment-status.pay-failed  { background: var(--bata-lite); color: var(--bata); }
+.order-payment-status.pay-refund  { background: var(--kunyit-lite); color: var(--kunyit); }
+
+.payment-error {
+  margin-top: 0.6rem;
+  font-size: 0.82rem;
+  color: var(--bata);
+  text-align: center;
+}

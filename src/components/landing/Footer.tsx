@@ -21,7 +21,7 @@ export function Footer() {
           <div>
             <div className="footer-col-title">Layanan Kami</div>
             <ul className="footer-links">
-              <li><a href="#">Daftar Mitra Toko</a></li>
+              <li><Link href="/mitra">Daftar Mitra Toko</Link></li>
               <li><a href="#">Syarat &amp; Ketentuan</a></li>
               <li><a href="#">Kebijakan Privasi</a></li>
             </ul>
@@ -29,9 +29,10 @@ export function Footer() {
           <div>
             <div className="footer-col-title">Hubungi Kami</div>
             <ul className="footer-links">
-              <li><a href="#">Bantuan Layanan</a></li>
+              {/* Bantuan diarahkan ke WhatsApp — itu kanal dukungan yang benar-benar ada. */}
+              <li><a href="https://wa.me/628991905928" target="_blank" rel="noopener noreferrer">Bantuan Layanan</a></li>
               <li><a href="https://wa.me/628991905928" target="_blank" rel="noopener noreferrer">WhatsApp: +62 899-1905-928</a></li>
-              <li><a href="#">Email: cs@lavanyaupakara.com</a></li>
+              <li><a href="mailto:cs@lavanyaupakara.com">Email: cs@lavanyaupakara.com</a></li>
             </ul>
           </div>
         </div>

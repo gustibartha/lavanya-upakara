@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CountUp } from "@/components/motion/CountUp";
 import { DupaSmoke } from "@/components/motion/DupaSmoke";
+import { HeroShowcase } from "@/components/landing/HeroShowcase";
 
 /** Judul hero dipecah per kata agar bisa naik satu-satu seperti irama tabuh. */
 const TITLE_WORDS: { text: string; accent?: boolean; em?: boolean }[] = [
@@ -70,35 +71,7 @@ export function Hero() {
         </div>
 
         <div className="hero-visual anim-fadeup stagger-4" data-reveal="scale">
-          <div className="hero-visual-card main-card">
-            <div className="card-header-color"></div>
-            <div className="card-body-preview">
-              <div className="mini-store-row">
-                <img src="/images/stores/default-store.png" alt="Toko" className="mini-store-img" />
-                <div className="mini-store-info">
-                  <span className="mini-store-name">Toko Sari Ayu</span>
-                  <span className="mini-store-dist">0.8 km dari lokasimu</span>
-                </div>
-                <span className="mini-store-open">Buka</span>
-              </div>
-              <div className="mini-store-row">
-                <img src="/images/stores/default-store.png" alt="Toko" className="mini-store-img" />
-                <div className="mini-store-info">
-                  <span className="mini-store-name">Dharma Upakara</span>
-                  <span className="mini-store-dist">1.2 km dari lokasimu</span>
-                </div>
-                <span className="mini-store-open">Buka</span>
-              </div>
-              <div className="mini-products">
-                <div className="mini-prod"><img src="/images/products/canang-sari-harian.png" alt="Canang" /> <span>Canang</span> <b>Rp 10rb</b></div>
-                <div className="mini-prod"><img src="/images/products/dupa-harum-pandan.png" alt="Dupa" /> <span>Dupa</span> <b>Rp 15rb</b></div>
-              </div>
-            </div>
-          </div>
-
-          <div className="hero-visual-card float-card-1"><span>📍</span> Toko Terdekat</div>
-          <div className="hero-visual-card float-card-2"><span>🤖</span> Asisten AI Pintar</div>
-          <div className="hero-visual-card float-card-3"><span>💎</span> Harga Transparan</div>
+          <HeroShowcase />
         </div>
       </div>
     </section>

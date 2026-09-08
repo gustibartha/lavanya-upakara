@@ -24,7 +24,7 @@ export default function MitraPage() {
               Bergabung Menjadi <span className="text-[#B84A2A]">Mitra Lavanya</span>
             </h1>
             <p className="text-gray-600 text-lg">
-              Perluas jangkauan toko Anda ke ribuan umat di Bali. Daftarkan toko perlengkapan upacara Anda sekarang secara gratis!
+              Perluas jangkauan toko Anda ke ribuan umat di Jabodetabek. Daftarkan toko perlengkapan upacara Anda sekarang secara gratis!
             </p>
           </div>
 

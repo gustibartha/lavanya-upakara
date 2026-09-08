@@ -36,7 +36,7 @@ export function Footer() {
           </div>
         </div>
         <div className="footer-bottom">
-          <span>&copy; 2026 Lavanya Upakara. Dibuat dengan 🙏 di Bali.</span>
+          <span>&copy; 2026 Lavanya Upakara. Dibuat dengan 🙏 di Jakarta.</span>
           <span>Om Shanti Shanti Shanti Om</span>
         </div>
       </div>

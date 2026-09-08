@@ -183,7 +183,7 @@ export default function DaftarPage() {
         <div className="auth-deco-emoji">🌺</div>
         <p className="auth-deco-text">
           Bergabung dengan <strong>30.000+</strong><br />
-          pengguna di seluruh Bali
+          pengguna di seluruh Jabodetabek
         </p>
       </div>
     </div>

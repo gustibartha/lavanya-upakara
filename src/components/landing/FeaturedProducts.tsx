@@ -8,9 +8,9 @@ export function FeaturedProducts() {
 
   const products = [
     { id: 1, slug: "canang-sari-harian", name: "Canang Sari Segar", price: 15000, store: "Toko Sari Ayu", rating: 4.9, sold: "2.1k", image: "/images/products/canang-sari-harian.png", color: "#FBF0DC" },
-    { id: 2, slug: "dupa-harum-pandan", name: "Dupa Maharaja Pandan", price: 25000, store: "Baturiti Upakara", rating: 4.8, sold: "850", image: "/images/products/dupa-harum-pandan.png", color: "#E4F0EA" },
+    { id: 2, slug: "dupa-harum-pandan", name: "Dupa Maharaja Pandan", price: 25000, store: "Dharma Upakara", rating: 4.8, sold: "850", image: "/images/products/dupa-harum-pandan.png", color: "#E4F0EA" },
     { id: 3, slug: "dulang-kayu-cendana", name: "Dulang Fiber 30cm", price: 120000, store: "Griya Sesajen", rating: 4.9, sold: "340", image: "/images/products/dulang-kayu-cendana.png", color: "#FAE7E1" },
-    { id: 4, slug: "buah-sesajen-komplit", name: "Paket Buah Pejati", price: 85000, store: "Pasar Seni Bali", rating: 4.7, sold: "120", image: "/images/products/buah-sesajen-komplit.png", color: "#FBF5DC" },
+    { id: 4, slug: "buah-sesajen-komplit", name: "Paket Buah Pejati", price: 85000, store: "Banten Jaya Sempurna", rating: 4.7, sold: "120", image: "/images/products/buah-sesajen-komplit.png", color: "#FBF5DC" },
   ];
 
   return (

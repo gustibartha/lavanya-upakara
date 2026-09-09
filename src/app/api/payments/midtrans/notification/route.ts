@@ -8,11 +8,8 @@
 import { db } from "@/db";
 import { orders } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import {
-  isMidtransConfigured,
-  isValidSignature,
-  mapTransactionStatus,
-} from "@/lib/midtrans";
+import { isMidtransConfigured, isValidSignature } from "@/lib/midtrans";
+import { applyMidtransStatus } from "@/lib/apply-payment-status";
 
 interface MidtransNotification {
   order_id?: string;
@@ -78,37 +75,21 @@ export async function POST(request: Request) {
       return Response.json({ message: "Pesanan tidak dikenal" });
     }
 
-    const statusBayar = mapTransactionStatus(
-      payload.transaction_status ?? "",
-      payload.fraud_status,
-    );
+    // Notifikasi bisa datang berkali-kali dan tidak selalu berurutan; aturan
+    // soal itu (termasuk pesanan lunas hanya boleh berubah lewat refund) ada
+    // di applyMidtransStatus, dipakai bersama dengan endpoint sinkronisasi
+    // manual supaya kedua jalur konsisten.
+    const hasil = await applyMidtransStatus(order, {
+      ...payload,
+      // transaction_status opsional di payload webhook (Midtrans bisa saja
+      // tidak menyertakannya), tapi applyMidtransStatus butuh nilai pasti —
+      // string kosong berakhir di cabang default mapTransactionStatus.
+      transaction_status: payload.transaction_status ?? "",
+    });
 
-    // Notifikasi bisa datang berkali-kali dan tidak selalu berurutan.
-    // Pesanan yang sudah lunas hanya boleh berubah oleh refund.
-    if (order.status_bayar === "dibayar" && statusBayar !== "refund") {
-      return Response.json({ message: "Status sudah final" });
-    }
-
-    const paidAt =
-      statusBayar === "dibayar"
-        ? payload.settlement_time ?? payload.transaction_time ?? new Date().toISOString()
-        : null;
-
-    await db
-      .update(orders)
-      .set({
-        status_bayar: statusBayar,
-        midtrans_transaction_id: payload.transaction_id ?? null,
-        payment_type: payload.payment_type ?? null,
-        paid_at: paidAt,
-        // Pesanan baru masuk antrean toko setelah dananya benar-benar diterima.
-        ...(statusBayar === "dibayar" && order.status === "menunggu"
-          ? { status: "diproses" }
-          : {}),
-      })
-      .where(eq(orders.id, order.id));
-
-    return Response.json({ message: "Notifikasi diterima" });
+    return Response.json({
+      message: hasil.changed ? "Notifikasi diterima" : "Status sudah final",
+    });
   } catch (error) {
     console.error("Midtrans notification error:", error);
     // 500 membuat Midtrans mencoba lagi nanti, jadi status tidak hilang.

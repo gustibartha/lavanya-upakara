@@ -8,6 +8,8 @@ import { createHash } from "crypto";
 
 const SNAP_SANDBOX = "https://app.sandbox.midtrans.com/snap/v1/transactions";
 const SNAP_PRODUCTION = "https://app.midtrans.com/snap/v1/transactions";
+const CORE_API_SANDBOX = "https://api.sandbox.midtrans.com/v2";
+const CORE_API_PRODUCTION = "https://api.midtrans.com/v2";
 
 export const isMidtransProduction =
   process.env.MIDTRANS_IS_PRODUCTION === "true";
@@ -128,6 +130,50 @@ export async function createSnapTransaction(
   }
 
   return { token: data.token, redirect_url: data.redirect_url };
+}
+
+export interface StatusMidtransApi {
+  transaction_status: string;
+  fraud_status?: string;
+  transaction_id?: string;
+  payment_type?: string;
+  settlement_time?: string;
+  transaction_time?: string;
+  status_code: string;
+}
+
+/**
+ * Menanyakan status transaksi langsung ke Midtrans, sebagai jaring pengaman
+ * ketika webhook notifikasi belum atau tidak pernah sampai — misalnya
+ * URL notifikasi belum terdaftar di dashboard, atau sempat gagal terkirim.
+ *
+ * Dipanggil dengan `midtransOrderId` (referensi yang dikirim ke Midtrans
+ * saat transaksi dibuat), bukan id pesanan internal kita.
+ */
+export async function getTransactionStatus(
+  midtransOrderId: string,
+): Promise<StatusMidtransApi> {
+  const endpoint = isMidtransProduction ? CORE_API_PRODUCTION : CORE_API_SANDBOX;
+  const auth = Buffer.from(`${serverKey()}:`).toString("base64");
+
+  const response = await fetch(
+    `${endpoint}/${encodeURIComponent(midtransOrderId)}/status`,
+    {
+      headers: {
+        Accept: "application/json",
+        Authorization: `Basic ${auth}`,
+      },
+    },
+  );
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok || !data?.transaction_status) {
+    const detail = data?.status_message || "tidak diketahui";
+    throw new Error(`Midtrans menolak permintaan status: ${detail}`);
+  }
+
+  return data;
 }
 
 /**

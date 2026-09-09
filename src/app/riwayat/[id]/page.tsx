@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Navbar } from "@/components/landing/Navbar";
@@ -43,6 +43,7 @@ export default function OrderDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [syncing, setSyncing] = useState(false);
 
   const fetchOrder = useCallback(() => {
     if (!id) return;
@@ -63,15 +64,56 @@ export default function OrderDetailPage() {
   }, [fetchOrder]);
 
   /**
-   * Dipanggil setelah Snap ditutup. Status pelunasan datang dari webhook
-   * Midtrans, yang kadang tiba sesaat setelah pembeli selesai — karena itu
-   * data diambil sekali lagi beberapa detik kemudian.
+   * Menanyakan status transaksi langsung ke Midtrans dan menuliskannya ke
+   * pesanan ini, lalu membaca ulang datanya.
+   *
+   * Snap melapor sukses lewat callback di browser, tapi status pesanan
+   * sebenarnya berubah lewat webhook — dan webhook bisa terlambat, gagal
+   * terkirim, atau URL-nya belum terdaftar di dashboard Midtrans. Tanpa
+   * ini, pembeli yang sudah bayar bisa terus melihat "Menunggu Pembayaran"
+   * tanpa cara memastikan sendiri.
    */
+  const syncMidtransStatus = useCallback(async () => {
+    if (!id) return;
+    try {
+      await fetch(`/api/payments/midtrans/status?order_id=${id}`);
+    } catch {
+      // Gagal diam-diam — halaman tetap menampilkan status terakhir yang
+      // diketahui, dan pembeli masih bisa mencoba tombol sinkronisasi manual.
+    }
+  }, [id]);
+
+  /** Dipanggil setelah Snap ditutup — saat itulah paling penting untuk tahu
+   *  status sebenarnya, karena webhook mungkin belum sempat tiba. */
   const reloadOrder = useCallback(() => {
-    fetchOrder();
-    const timer = setTimeout(fetchOrder, 4000);
+    syncMidtransStatus().finally(fetchOrder);
+    const timer = setTimeout(() => {
+      syncMidtransStatus().finally(fetchOrder);
+    }, 4000);
     return () => clearTimeout(timer);
-  }, [fetchOrder]);
+  }, [fetchOrder, syncMidtransStatus]);
+
+  const handleSyncClick = () => {
+    setSyncing(true);
+    syncMidtransStatus()
+      .then(fetchOrder)
+      .finally(() => setSyncing(false));
+  };
+
+  // Dijalankan sekali saat pesanan pertama kali termuat (termasuk saat
+  // pembeli membuka halaman ini di kunjungan terpisah, bukan cuma tepat
+  // setelah Snap ditutup) — supaya status yang sudah lunas di sisi Midtrans
+  // tapi belum sempat diberitahukan lewat webhook langsung ketahuan.
+  // Ref-nya mencegah pengecekan berulang untuk pesanan yang sama setiap
+  // fetchOrder memperbarui `order`.
+  const sudahDisinkronkan = useRef<string | null>(null);
+  useEffect(() => {
+    if (!order) return;
+    if (sudahDisinkronkan.current === order.id) return;
+    if (order.metode_bayar !== "midtrans" || !PAYABLE.has(order.status_bayar)) return;
+    sudahDisinkronkan.current = order.id;
+    syncMidtransStatus().finally(fetchOrder);
+  }, [order, fetchOrder, syncMidtransStatus]);
 
   const handleCopyId = () => {
     navigator.clipboard.writeText(id || "").then(() => {
@@ -301,6 +343,16 @@ export default function OrderDetailPage() {
                       <div className={`order-payment-status ${PAYMENT_STATUS[order.status_bayar]?.className ?? ""}`}>
                         {PAYMENT_STATUS[order.status_bayar]?.label ?? "Belum Dibayar"}
                       </div>
+                      {order.metode_bayar === "midtrans" && PAYABLE.has(order.status_bayar) && (
+                        <button
+                          type="button"
+                          className="order-sync-btn"
+                          onClick={handleSyncClick}
+                          disabled={syncing}
+                        >
+                          {syncing ? "Memeriksa..." : "🔄 Sudah bayar? Cek status"}
+                        </button>
+                      )}
                     </div>
                     <div className="order-grand-total">{formatRupiah(order.total_harga)}</div>
                   </div>

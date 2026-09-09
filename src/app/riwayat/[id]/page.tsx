@@ -7,6 +7,7 @@ import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { formatRupiah } from "@/lib/data";
 import { MidtransPayButton } from "@/components/store/MidtransPayButton";
+import { PAYMENT_STATUS, PAYABLE, labelMetodeBayar, nomorPesanan } from "@/lib/order-status";
 import {
   Package,
   CheckCircle2,
@@ -31,31 +32,6 @@ const STATUS_STEPS: { key: OrderStatus; label: string; icon: React.ElementType; 
 ];
 
 const STATUS_ORDER: OrderStatus[] = ["menunggu", "diproses", "dikirim", "selesai"];
-
-const PAYMENT_STATUS: Record<string, { label: string; className: string }> = {
-  belum_bayar: { label: "Belum Dibayar", className: "pay-unpaid" },
-  pending: { label: "Menunggu Pembayaran", className: "pay-pending" },
-  dibayar: { label: "Lunas ✓", className: "pay-paid" },
-  gagal: { label: "Pembayaran Gagal", className: "pay-failed" },
-  kadaluarsa: { label: "Pembayaran Kedaluwarsa", className: "pay-failed" },
-  refund: { label: "Dana Dikembalikan", className: "pay-refund" },
-};
-
-/** Nama ramah untuk payment_type yang dikirim Midtrans. */
-const PAYMENT_TYPE_LABEL: Record<string, string> = {
-  qris: "QRIS",
-  bank_transfer: "Transfer Bank (VA)",
-  echannel: "Mandiri Bill",
-  permata: "Permata VA",
-  gopay: "GoPay",
-  shopeepay: "ShopeePay",
-  credit_card: "Kartu Kredit",
-  cstore: "Gerai Retail",
-  akulaku: "Akulaku",
-};
-
-/** Pesanan online yang dananya belum masuk masih boleh dibayar ulang. */
-const PAYABLE = new Set(["belum_bayar", "pending", "gagal", "kadaluarsa"]);
 
 function getStepIndex(status: OrderStatus) {
   return STATUS_ORDER.indexOf(status);
@@ -142,7 +118,7 @@ export default function OrderDetailPage() {
                   <div className="order-detail-id-row">
                     <div>
                       <div className="order-detail-label">Nomor Pesanan</div>
-                      <div className="order-detail-id">#{id?.split("-").slice(0, 2).join("-").toUpperCase()}</div>
+                      <div className="order-detail-id">#{nomorPesanan(id ?? "")}</div>
                     </div>
                     <button className="order-copy-btn" onClick={handleCopyId} title="Salin ID">
                       {copied ? <Check size={16} /> : <Copy size={16} />}
@@ -320,10 +296,7 @@ export default function OrderDetailPage() {
                     <div>
                       <div className="order-total-label">Total Pembayaran</div>
                       <div className="order-payment-method">
-                        {order.metode_bayar === "midtrans"
-                          ? PAYMENT_TYPE_LABEL[order.payment_type as string] ||
-                            "Pembayaran Online"
-                          : "Bayar di Tempat (COD)"}
+                        {labelMetodeBayar(order.metode_bayar, order.payment_type)}
                       </div>
                       <div className={`order-payment-status ${PAYMENT_STATUS[order.status_bayar]?.className ?? ""}`}>
                         {PAYMENT_STATUS[order.status_bayar]?.label ?? "Belum Dibayar"}

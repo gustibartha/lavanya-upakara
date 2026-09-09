@@ -61,12 +61,16 @@ export function CartSidebar() {
             <div className="cart-empty">
               <div className="cart-empty-emoji">🛒</div>
               <p>Keranjangmu masih kosong</p>
-              <button
+              {/* Keranjang kosong tidak punya apa pun untuk dilanjutkan, jadi
+                  tombolnya membawa ke katalog — bukan sekadar menutup laci,
+                  yang dari layar terlihat seperti tidak terjadi apa-apa. */}
+              <Link
+                href="/katalog"
                 className="btn-primary"
                 onClick={() => setIsCartOpen(false)}
               >
                 Mulai Belanja
-              </button>
+              </Link>
             </div>
           ) : (
             <div className="cart-items-list">

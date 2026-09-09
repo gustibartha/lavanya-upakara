@@ -23,8 +23,8 @@ export function Footer() {
             <div className="footer-col-title">Layanan Kami</div>
             <ul className="footer-links">
               <li><Link href="/mitra">Daftar Mitra Toko</Link></li>
-              <li><a href="#">Syarat &amp; Ketentuan</a></li>
-              <li><a href="#">Kebijakan Privasi</a></li>
+              <li><Link href="/syarat-ketentuan">Syarat &amp; Ketentuan</Link></li>
+              <li><Link href="/kebijakan-privasi">Kebijakan Privasi</Link></li>
             </ul>
           </div>
           <div>

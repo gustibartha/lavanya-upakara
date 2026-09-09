@@ -15,11 +15,18 @@ export const isMidtransProduction =
 /** Terpasang kalau Server Key tersedia. Dipakai agar UI bisa menyembunyikan
  *  opsi pembayaran online ketika kredensial belum diisi. */
 export function isMidtransConfigured() {
-  return Boolean(process.env.MIDTRANS_SERVER_KEY);
+  return Boolean(process.env.MIDTRANS_SERVER_KEY?.trim());
 }
 
 function serverKey() {
-  const key = process.env.MIDTRANS_SERVER_KEY;
+  // Kotak isian environment variable di Vercel, atau proses salin-tempel
+  // dari dashboard Midtrans, mudah ikut membawa spasi atau baris baru di
+  // ujung kunci. Itu membuat header Basic Auth jadi tidak dikenali Midtrans,
+  // dan pesan errornya ("Access denied due to unauthorized transaction")
+  // terlihat sama persis dengan kunci yang benar-benar salah — jadi
+  // dipangkas di sini daripada dibiarkan menghasilkan kegagalan yang
+  // membingungkan.
+  const key = process.env.MIDTRANS_SERVER_KEY?.trim();
   if (!key) {
     throw new Error(
       "MIDTRANS_SERVER_KEY belum diset. Isi di environment variable sebelum memakai pembayaran online.",

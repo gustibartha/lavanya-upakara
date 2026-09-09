@@ -111,15 +111,12 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Midtrans transaction error:", error);
 
-    // Dua jenis error aman diteruskan apa adanya ke pemakai — balasan
-    // Midtrans sendiri, dan pemeriksaan konfigurasi kami — karena keduanya
-    // tidak memuat rahasia. Tanpa ini semua kegagalan berakhir jadi pesan
-    // generik yang tidak bisa ditindaklanjuti siapa pun.
-    const bolehDiperlihatkan = (msg: string) =>
-      msg.startsWith("Midtrans menolak transaksi:") ||
-      msg.startsWith("Konfigurasi tidak cocok:");
+    // Pesan penolakan dari createSnapTransaction sudah berisi balasan
+    // Midtrans sendiri (tidak memuat rahasia), jadi aman diteruskan apa
+    // adanya — tanpa ini semua kegagalan berakhir jadi satu kalimat generik
+    // yang tidak bisa ditindaklanjuti siapa pun.
     const pesan =
-      error instanceof Error && bolehDiperlihatkan(error.message)
+      error instanceof Error && error.message.startsWith("Midtrans menolak transaksi:")
         ? error.message
         : "Gagal membuat transaksi pembayaran";
 

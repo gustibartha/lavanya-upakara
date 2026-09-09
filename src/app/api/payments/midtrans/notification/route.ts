@@ -41,12 +41,11 @@ export async function POST(request: Request) {
 
   // Tolak lebih dulu sebelum menyentuh database.
   //
-  // isValidSignature memanggil serverKey(), yang bisa melempar error kalau
-  // MIDTRANS_SERVER_KEY dan MIDTRANS_IS_PRODUCTION tidak sinkron (lihat
-  // src/lib/midtrans.ts). Tanpa try/catch di sini, kesalahan konfigurasi itu
-  // akan meruntuhkan seluruh permintaan jadi 500 tanpa isi — sulit dibedakan
-  // dari kegagalan platform, dan tidak pernah tercatat sebagai penolakan
-  // tanda tangan biasa.
+  // isValidSignature memanggil serverKey(), yang melempar error kalau
+  // MIDTRANS_SERVER_KEY belum diset (lihat src/lib/midtrans.ts). Dibungkus
+  // try/catch supaya kegagalan seperti itu membalas 500 dengan isi yang
+  // tercatat di log, bukan meruntuhkan seluruh permintaan jadi respons
+  // kosong yang sulit dibedakan dari kegagalan platform.
   let signatureValid: boolean;
   try {
     signatureValid = isValidSignature(payload);

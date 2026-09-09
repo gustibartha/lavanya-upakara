@@ -110,9 +110,19 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Midtrans transaction error:", error);
-    return Response.json(
-      { error: "Gagal membuat transaksi pembayaran" },
-      { status: 500 },
-    );
+
+    // Dua jenis error aman diteruskan apa adanya ke pemakai — balasan
+    // Midtrans sendiri, dan pemeriksaan konfigurasi kami — karena keduanya
+    // tidak memuat rahasia. Tanpa ini semua kegagalan berakhir jadi pesan
+    // generik yang tidak bisa ditindaklanjuti siapa pun.
+    const bolehDiperlihatkan = (msg: string) =>
+      msg.startsWith("Midtrans menolak transaksi:") ||
+      msg.startsWith("Konfigurasi tidak cocok:");
+    const pesan =
+      error instanceof Error && bolehDiperlihatkan(error.message)
+        ? error.message
+        : "Gagal membuat transaksi pembayaran";
+
+    return Response.json({ error: pesan }, { status: 500 });
   }
 }

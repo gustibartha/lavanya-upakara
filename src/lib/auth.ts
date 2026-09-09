@@ -88,6 +88,9 @@ export const auth = betterAuth({
     additionalFields: {
       phoneNumber: {
         type: "string",
+        // Akun lama tidak punya nomor, jadi tidak boleh diwajibkan di
+        // tingkat model — formulir pendaftaran yang mewajibkannya.
+        required: false,
       },
     },
   },

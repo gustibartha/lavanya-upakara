@@ -6,6 +6,7 @@ import { formatRupiah } from "@/lib/data";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { useCart } from "@/context/CartContext";
+import { PAYMENT_STATUS, nomorPesanan } from "@/lib/order-status";
 
 export default function RiwayatPage() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -99,10 +100,19 @@ export default function RiwayatPage() {
                   <div className="order-card-header">
                     <div className="order-meta">
                       <span className="order-date">{new Date(order.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                      <span className="order-id">#{order.id.split('-')[0].toUpperCase()}</span>
+                      <span className="order-id">#{nomorPesanan(order.id)}</span>
                     </div>
-                    <div className={`order-status ${getStatusClass(order.status)}`}>
-                      {getStatusLabel(order.status)}
+                    {/* Dua status yang berbeda dan sering tertukar: kiri soal
+                        dana, kanan soal pemrosesan barang oleh toko. */}
+                    <div className="order-status-group">
+                      <div
+                        className={`order-pay-badge ${PAYMENT_STATUS[order.status_bayar]?.className ?? "pay-unpaid"}`}
+                      >
+                        {PAYMENT_STATUS[order.status_bayar]?.label ?? "Belum Dibayar"}
+                      </div>
+                      <div className={`order-status ${getStatusClass(order.status)}`}>
+                        {getStatusLabel(order.status)}
+                      </div>
                     </div>
                   </div>
 

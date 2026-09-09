@@ -25,6 +25,28 @@ function serverKey() {
       "MIDTRANS_SERVER_KEY belum diset. Isi di environment variable sebelum memakai pembayaran online.",
     );
   }
+
+  // Kunci Sandbox selalu berawalan "SB-Mid-server-", kunci Production tidak.
+  // MIDTRANS_IS_PRODUCTION adalah variabel terpisah yang harus disetel manual
+  // agar sinkron dengan kunci ini — kalau salah satu tertinggal, permintaan
+  // akan dikirim ke API yang salah dan Midtrans membalas dengan pesan yang
+  // tidak jelas asal-usulnya (biasanya "Access denied" atau 401). Diperiksa
+  // di sini supaya kesalahan konfigurasi ketahuan lewat pesan yang jelas,
+  // bukan lewat kegagalan Midtrans yang membingungkan.
+  const keyIsSandbox = key.startsWith("SB-Mid-server-");
+  if (isMidtransProduction && keyIsSandbox) {
+    throw new Error(
+      "Konfigurasi tidak cocok: MIDTRANS_SERVER_KEY adalah kunci Sandbox (SB-Mid-server-...) " +
+        "tapi MIDTRANS_IS_PRODUCTION=true. Set MIDTRANS_IS_PRODUCTION=false, atau ganti ke kunci Production.",
+    );
+  }
+  if (!isMidtransProduction && !keyIsSandbox) {
+    throw new Error(
+      "Konfigurasi tidak cocok: MIDTRANS_SERVER_KEY adalah kunci Production " +
+        'tapi MIDTRANS_IS_PRODUCTION bukan "true". Set MIDTRANS_IS_PRODUCTION=true, atau ganti ke kunci Sandbox.',
+    );
+  }
+
   return key;
 }
 

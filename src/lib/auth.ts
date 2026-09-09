@@ -7,6 +7,41 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/db";
 import * as authSchema from "@/db/auth-schema";
 
+const isVercel = Boolean(process.env.VERCEL);
+
+/** Menambahkan https:// bila host diberikan tanpa skema (gaya Vercel). */
+function toURL(value?: string): string | undefined {
+  const raw = value?.trim();
+  if (!raw) return undefined;
+  try {
+    return new URL(raw.includes("://") ? raw : `https://${raw}`).origin;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Alamat dasar Better Auth.
+ *
+ * Origin dari baseURL ini otomatis ikut dipercaya, jadi kalau salah, semua
+ * login dan pendaftaran ditolak "Invalid origin".
+ *
+ * BETTER_AUTH_URL yang menunjuk localhost padahal berjalan di Vercel sudah
+ * pasti keliru — biasanya tersalin dari contoh konfigurasi lokal. Dalam
+ * keadaan itu alamat produksi dari Vercel yang dipakai, supaya satu salah
+ * ketik tidak mematikan seluruh autentikasi.
+ */
+function resolveBaseURL(): string | undefined {
+  const explicit = toURL(process.env.BETTER_AUTH_URL);
+  const vercelProduction = toURL(process.env.VERCEL_PROJECT_PRODUCTION_URL);
+  const isLocal = explicit
+    ? /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(explicit)
+    : false;
+
+  if (explicit && !(isVercel && isLocal)) return explicit;
+  return vercelProduction ?? explicit;
+}
+
 /**
  * Daftar origin yang boleh memakai endpoint autentikasi.
  *
@@ -24,14 +59,10 @@ function buildTrustedOrigins(): string[] {
     "http://localhost:3001",
   ]);
 
+  // Nilai yang tidak berbentuk URL dilewati, bukan membuat server gagal start.
   const add = (value?: string) => {
-    const raw = value?.trim();
-    if (!raw) return;
-    try {
-      origins.add(new URL(raw.includes("://") ? raw : `https://${raw}`).origin);
-    } catch {
-      // Nilai yang tidak berbentuk URL diabaikan, bukan membuat server gagal start.
-    }
+    const origin = toURL(value);
+    if (origin) origins.add(origin);
   };
 
   add(process.env.BETTER_AUTH_URL);
@@ -48,6 +79,7 @@ function buildTrustedOrigins(): string[] {
 }
 
 export const auth = betterAuth({
+  baseURL: resolveBaseURL(),
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: authSchema,

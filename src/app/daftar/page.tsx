@@ -36,7 +36,6 @@ export default function DaftarPage() {
         name: nama,
         email,
         password,
-        // @ts-ignore
         phoneNumber: phone,
       });
 

@@ -6,6 +6,9 @@ export const user = pgTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").notNull(),
   image: text("image"),
+  // Nomor WhatsApp dari formulir pendaftaran. Dibiarkan nullable karena
+  // akun yang sudah ada belum punya nomor.
+  phoneNumber: text("phone_number"),
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
 });

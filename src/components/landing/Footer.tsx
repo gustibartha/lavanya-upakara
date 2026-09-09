@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CS_EMAIL, CS_WHATSAPP_DISPLAY, waLink } from "@/lib/kontak";
 
 export function Footer() {
   return (
@@ -30,9 +31,9 @@ export function Footer() {
             <div className="footer-col-title">Hubungi Kami</div>
             <ul className="footer-links">
               {/* Bantuan diarahkan ke WhatsApp — itu kanal dukungan yang benar-benar ada. */}
-              <li><a href="https://wa.me/628991905928" target="_blank" rel="noopener noreferrer">Bantuan Layanan</a></li>
-              <li><a href="https://wa.me/628991905928" target="_blank" rel="noopener noreferrer">WhatsApp: +62 899-1905-928</a></li>
-              <li><a href="mailto:cs@lavanyaupakara.com">Email: cs@lavanyaupakara.com</a></li>
+              <li><a href={waLink()} target="_blank" rel="noopener noreferrer">Bantuan Layanan</a></li>
+              <li><a href={waLink()} target="_blank" rel="noopener noreferrer">WhatsApp: {CS_WHATSAPP_DISPLAY}</a></li>
+              <li><a href={`mailto:${CS_EMAIL}`}>Email: {CS_EMAIL}</a></li>
             </ul>
           </div>
         </div>

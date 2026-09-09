@@ -72,6 +72,20 @@ export const orders = pgTable("orders", {
   created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
 });
 
+// --- PARTNER APPLICATION (Pengajuan Mitra Toko) ---
+export const partnerApplications = pgTable("partner_applications", {
+  id: text("id").primaryKey(),
+  nama_toko: text("nama_toko").notNull(),
+  nama_pemilik: text("nama_pemilik").notNull(),
+  whatsapp: text("whatsapp").notNull(),
+  alamat: text("alamat").notNull(),
+  kategori: text("kategori").notNull(), // JSON array disimpan sebagai teks
+  // baru | dihubungi | disetujui | ditolak
+  status: text("status").notNull().default("baru"),
+  catatan_admin: text("catatan_admin"),
+  created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
+});
+
 // --- ORDER_ITEM (Detail Pesanan) ---
 export const orderItems = pgTable("order_items", {
   id: text("id").primaryKey(),
@@ -126,3 +140,5 @@ export type Order = typeof orders.$inferSelect;
 export type NewOrder = typeof orders.$inferInsert;
 export type OrderItem = typeof orderItems.$inferSelect;
 export type NewOrderItem = typeof orderItems.$inferInsert;
+export type PartnerApplication = typeof partnerApplications.$inferSelect;
+export type NewPartnerApplication = typeof partnerApplications.$inferInsert;

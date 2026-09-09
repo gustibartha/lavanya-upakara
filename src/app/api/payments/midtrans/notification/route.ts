@@ -40,7 +40,25 @@ export async function POST(request: Request) {
   }
 
   // Tolak lebih dulu sebelum menyentuh database.
-  if (!isValidSignature(payload)) {
+  //
+  // isValidSignature memanggil serverKey(), yang bisa melempar error kalau
+  // MIDTRANS_SERVER_KEY dan MIDTRANS_IS_PRODUCTION tidak sinkron (lihat
+  // src/lib/midtrans.ts). Tanpa try/catch di sini, kesalahan konfigurasi itu
+  // akan meruntuhkan seluruh permintaan jadi 500 tanpa isi — sulit dibedakan
+  // dari kegagalan platform, dan tidak pernah tercatat sebagai penolakan
+  // tanda tangan biasa.
+  let signatureValid: boolean;
+  try {
+    signatureValid = isValidSignature(payload);
+  } catch (error) {
+    console.error("Gagal memverifikasi tanda tangan Midtrans:", error);
+    return Response.json(
+      { error: "Konfigurasi pembayaran bermasalah" },
+      { status: 500 },
+    );
+  }
+
+  if (!signatureValid) {
     console.warn("Notifikasi Midtrans dengan tanda tangan tidak sah ditolak", {
       order_id: payload.order_id,
     });

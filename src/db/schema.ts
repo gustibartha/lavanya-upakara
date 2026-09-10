@@ -69,6 +69,17 @@ export const orders = pgTable("orders", {
   payment_type: text("payment_type"), // qris | bank_transfer | gopay | dst
   paid_at: timestamp("paid_at", { mode: "string" }),
 
+  // --- Komisi platform ---
+  // Hanya terisi untuk pembayaran online yang sudah lunas — uang COD tidak
+  // pernah melewati sistem kami, jadi tidak ada yang bisa dipotong dari
+  // situ. Persen dan nominalnya dikunci pada saat pesanan menjadi lunas,
+  // supaya perubahan tarif komisi di kemudian hari tidak mengubah catatan
+  // transaksi yang sudah selesai.
+  // doublePrecision, bukan integer — supaya tarif seperti 4.5% tidak perlu
+  // migrasi ulang kalau kelak berubah dari angka bulat.
+  komisi_persen: doublePrecision("komisi_persen"),
+  komisi_nominal: integer("komisi_nominal"),
+
   created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
 });
 

@@ -275,7 +275,15 @@ export default function MitraPage() {
                     {loading ? "Menyimpan pengajuan..." : "🚀 Kirim Pengajuan Pendaftaran"}
                   </button>
                   <p className="text-center text-xs text-gray-500 mt-4">
-                    Dengan mendaftar, Anda menyetujui Syarat dan Ketentuan layanan Lavanya Upakara.
+                    Dengan mendaftar, Anda menyetujui{" "}
+                    <Link href="/syarat-ketentuan" className="underline">
+                      Syarat &amp; Ketentuan
+                    </Link>{" "}
+                    dan{" "}
+                    <Link href="/kebijakan-privasi" className="underline">
+                      Kebijakan Privasi
+                    </Link>{" "}
+                    Lavanya Upakara.
                   </p>
                 </div>
               </form>

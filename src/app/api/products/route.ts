@@ -12,7 +12,9 @@ export async function GET(request: Request) {
   const populer = searchParams.get("populer");
   const store_id = searchParams.get("store_id");
 
-  const conditions = [];
+  // Produk yang dinonaktifkan lewat admin tidak boleh muncul di katalog
+  // pembeli — barisnya tetap ada di database, hanya disembunyikan di sini.
+  const conditions = [eq(products.aktif, true)];
 
   if (kategori && kategori !== "semua") {
     conditions.push(eq(products.kategori_slug, kategori));

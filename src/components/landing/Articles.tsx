@@ -1,32 +1,27 @@
 import Link from "next/link";
+import { db } from "@/db";
+import { articles } from "@/db/schema";
+import { desc, eq } from "drizzle-orm";
 
-export function Articles() {
-  const articles = [
-    {
-      id: 1,
-      title: "Memahami Makna Banten Pejati dalam Upacara",
-      date: "12 Mar 2026",
-      category: "Edukasi",
-      image: "/images/categories/sesajen.png",
-      excerpt: "Banten Pejati merupakan salah satu sarana upacara dasar yang wajib ada dalam berbagai ritual Hindu di Bali. Mari kenali komponennya.",
-    },
-    {
-      id: 2,
-      title: "Persiapan Menyambut Hari Raya Galungan",
-      date: "05 Mar 2026",
-      category: "Hari Raya",
-      image: "/images/products/sesajen-galungan.png",
-      excerpt: "Hari kemenangan Dharma melawan Adharma sebentar lagi tiba. Apa saja perlengkapan yang perlu Anda persiapkan dari sekarang?",
-    },
-    {
-      id: 3,
-      title: "Filosofi Dupa: Lebih dari Sekadar Pengharum",
-      date: "28 Feb 2026",
-      category: "Tradisi",
-      image: "/images/products/dupa-harum-pandan.png",
-      excerpt: "Asap dupa melambangkan doa umat yang membubung ke hadapan Ida Sang Hyang Widhi Wasa. Ketahui jenis dupa terbaik untuk sembahyang.",
-    },
-  ];
+export async function Articles() {
+  const daftarArtikel = await db
+    .select({
+      id: articles.id,
+      slug: articles.slug,
+      judul: articles.judul,
+      ringkasan: articles.ringkasan,
+      kategori: articles.kategori,
+      gambar: articles.gambar,
+      created_at: articles.created_at,
+    })
+    .from(articles)
+    .where(eq(articles.aktif, true))
+    .orderBy(desc(articles.created_at))
+    .limit(3);
+
+  // Bagian ini disembunyikan sampai ada artikel yang diterbitkan — daripada
+  // menampilkan kartu kosong atau memaksa tiga artikel contoh selalu ada.
+  if (daftarArtikel.length === 0) return null;
 
   return (
     <section className="articles-section container" id="artikel">
@@ -36,22 +31,32 @@ export function Articles() {
           <h2 className="section-title">Artikel Terbaru</h2>
           <p className="section-sub">Tingkatkan pemahaman spiritual dan temukan panduan upacara di sini.</p>
         </div>
-        <Link href="#" className="btn btn-outline anim-fadeup stagger-1" data-reveal="right">
+        <Link href="/edukasi" className="btn btn-outline anim-fadeup stagger-1" data-reveal="right">
           Lihat Semua Artikel
         </Link>
       </div>
 
       <div className="articles-grid">
-        {articles.map((article, i) => (
-          <Link href="#" key={article.id} className={`article-card anim-fadeup stagger-${(i % 3) + 1}`}>
+        {daftarArtikel.map((artikel, i) => (
+          <Link
+            href={`/edukasi/${artikel.slug}`}
+            key={artikel.id}
+            className={`article-card anim-fadeup stagger-${(i % 3) + 1}`}
+          >
             <div className="article-img-wrapper">
-              <img src={article.image} alt={article.title} className="article-img" />
-              <span className="article-category">{article.category}</span>
+              <img src={artikel.gambar} alt={artikel.judul} className="article-img" />
+              <span className="article-category">{artikel.kategori}</span>
             </div>
             <div className="article-body">
-              <span className="article-date">{article.date}</span>
-              <h3 className="article-title">{article.title}</h3>
-              <p className="article-excerpt">{article.excerpt}</p>
+              <span className="article-date">
+                {new Date(artikel.created_at).toLocaleDateString("id-ID", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </span>
+              <h3 className="article-title">{artikel.judul}</h3>
+              <p className="article-excerpt">{artikel.ringkasan}</p>
               <span className="article-read-more">Baca Selengkapnya →</span>
             </div>
           </Link>

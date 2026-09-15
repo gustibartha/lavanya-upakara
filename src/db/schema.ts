@@ -36,6 +36,36 @@ export const products = pgTable("products", {
   bg_color: text("bg_color").notNull().default("#FDF0DC"),
   populer: boolean("populer").default(false),
   stok: integer("stok").default(100),
+  // Produk yang dinonaktifkan disembunyikan dari katalog tapi barisnya tetap
+  // ada — order_items lama merujuk product_id ini, jadi dihapus sungguhan
+  // akan merusak riwayat pesanan (dan ditolak begitu saja oleh foreign key
+  // kalau produk itu pernah dipesan).
+  aktif: boolean("aktif").notNull().default(true),
+  created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
+});
+
+// --- ADMIN (Operator internal — bukan akun pembeli) ---
+// Sengaja terpisah total dari tabel `user` milik Better Auth. Akun pembeli
+// bisa mendaftar sendiri lewat /daftar; akun admin tidak — hanya dibuat
+// lewat skrip (lihat src/db/seed-admin.ts), supaya tidak ada jalur publik
+// yang bisa menghasilkan akun berwenang mengubah katalog.
+export const admins = pgTable("admins", {
+  id: text("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  password_hash: text("password_hash").notNull(),
+  nama: text("nama").notNull(),
+  created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
+});
+
+// Token sesi disimpan di database (bukan JWT tanpa status) supaya sesi bisa
+// dicabut paksa — misal kalau laptop admin hilang — dengan menghapus baris
+// ini, bukan menunggu kedaluwarsa alami.
+export const adminSessions = pgTable("admin_sessions", {
+  id: text("id").primaryKey(), // token acak itu sendiri, bukan id berurutan
+  admin_id: text("admin_id")
+    .notNull()
+    .references(() => admins.id, { onDelete: "cascade" }),
+  expires_at: timestamp("expires_at", { mode: "string" }).notNull(),
   created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
 });
 
@@ -112,6 +142,13 @@ export const productsRelations = relations(products, ({ one }) => ({
   }),
 }));
 
+export const adminSessionsRelations = relations(adminSessions, ({ one }) => ({
+  admin: one(admins, {
+    fields: [adminSessions.admin_id],
+    references: [admins.id],
+  }),
+}));
+
 export const ordersRelations = relations(orders, ({ one, many }) => ({
   store: one(stores, {
     fields: [orders.store_id],
@@ -142,3 +179,6 @@ export type OrderItem = typeof orderItems.$inferSelect;
 export type NewOrderItem = typeof orderItems.$inferInsert;
 export type PartnerApplication = typeof partnerApplications.$inferSelect;
 export type NewPartnerApplication = typeof partnerApplications.$inferInsert;
+export type Admin = typeof admins.$inferSelect;
+export type NewAdmin = typeof admins.$inferInsert;
+export type AdminSession = typeof adminSessions.$inferSelect;

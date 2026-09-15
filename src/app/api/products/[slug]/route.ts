@@ -2,7 +2,7 @@
 
 import db from "@/db";
 import { products, stores } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 
 export async function GET(
@@ -32,7 +32,9 @@ export async function GET(
     })
     .from(products)
     .leftJoin(stores, eq(products.store_id, stores.id))
-    .where(eq(products.slug, slug))
+    // Produk nonaktif dianggap tidak ada — tautan lama (keranjang, riwayat
+    // pencarian, dsb) tidak boleh tetap bisa dibeli lewat halaman detailnya.
+    .where(and(eq(products.slug, slug), eq(products.aktif, true)))
     .limit(1);
 
   if (!result) {
@@ -51,7 +53,9 @@ export async function GET(
       kategori: products.kategori,
     })
     .from(products)
-    .where(eq(products.kategori_slug, result.kategori_slug))
+    .where(
+      and(eq(products.kategori_slug, result.kategori_slug), eq(products.aktif, true)),
+    )
     .limit(4);
 
   return Response.json({

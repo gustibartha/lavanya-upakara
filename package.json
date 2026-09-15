@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:seed": "npx tsx src/db/seed.ts",
+    "db:seed-admin": "npx tsx src/db/seed-admin.ts",
     "db:push": "npx drizzle-kit push",
     "db:studio": "npx drizzle-kit studio"
   },

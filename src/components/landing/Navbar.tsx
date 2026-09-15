@@ -70,6 +70,7 @@ export function Navbar() {
           <Link href="/">Beranda</Link>
           <Link href="/katalog">Katalog</Link>
           <Link href="/toko">Toko</Link>
+          <Link href="/edukasi">Edukasi</Link>
           <Link href="/mitra">Daftar Mitra</Link>
         </div>
 
@@ -168,6 +169,7 @@ export function Navbar() {
               <Link href="/" onClick={() => setMobileMenuOpen(false)}>Beranda</Link>
               <Link href="/katalog" onClick={() => setMobileMenuOpen(false)}>Katalog</Link>
               <Link href="/toko" onClick={() => setMobileMenuOpen(false)}>Toko</Link>
+              <Link href="/edukasi" onClick={() => setMobileMenuOpen(false)}>Edukasi</Link>
               <Link href="/mitra" onClick={() => setMobileMenuOpen(false)}>Daftar Mitra</Link>
             </div>
             

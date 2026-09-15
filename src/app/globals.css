@@ -2843,3 +2843,51 @@ footer { background: var(--malam); color: var(--muted); padding: 4rem 0 2rem; ma
   .admin-form-grid { grid-template-columns: 1fr; }
   .admin-content { padding: 1.25rem; }
 }
+
+/* ============================================================
+   HALAMAN DETAIL ARTIKEL EDUKASI
+   ============================================================ */
+.article-detail { max-width: 760px; margin: 0 auto 3.5rem; }
+.article-detail-category {
+  position: static;
+  display: inline-block;
+  background: var(--kunyit-lite);
+  color: var(--bata);
+  backdrop-filter: none;
+  margin-bottom: 1rem;
+}
+.article-detail-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3.5vw, 2.3rem);
+  font-weight: 700;
+  color: var(--malam);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.75rem;
+}
+.article-detail-date { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.75rem; }
+
+.article-detail-img-wrap {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-md);
+}
+.article-detail-img { width: 100%; max-height: 420px; object-fit: cover; }
+
+.article-detail-body p {
+  font-size: 1rem;
+  line-height: 1.85;
+  color: var(--coklat);
+  margin-bottom: 1.25rem;
+}
+
+.article-detail-note {
+  margin-top: 2rem;
+  padding: 1rem 1.25rem;
+  background: var(--krem-dark);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: var(--coklat-mid);
+}

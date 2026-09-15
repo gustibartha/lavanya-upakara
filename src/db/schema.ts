@@ -69,6 +69,22 @@ export const adminSessions = pgTable("admin_sessions", {
   created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
 });
 
+// --- ARTICLE (Artikel Edukasi) ---
+export const articles = pgTable("articles", {
+  id: text("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  judul: text("judul").notNull(),
+  ringkasan: text("ringkasan").notNull(), // ditampilkan di kartu daftar artikel
+  konten: text("konten").notNull(), // JSON array of paragraf (string[])
+  kategori: text("kategori").notNull(), // "Edukasi" | "Hari Raya" | "Tradisi", dst — teks bebas seperti products.kategori
+  gambar: text("gambar").notNull(),
+  // Artikel nonaktif tersimpan sebagai draf — tidak tampil di /edukasi
+  // maupun di beranda, tapi tidak hilang kalau sewaktu-waktu mau
+  // diterbitkan lagi.
+  aktif: boolean("aktif").notNull().default(true),
+  created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
+});
+
 // --- ORDER (Pesanan) ---
 export const orders = pgTable("orders", {
   id: text("id").primaryKey(),
@@ -182,3 +198,5 @@ export type NewPartnerApplication = typeof partnerApplications.$inferInsert;
 export type Admin = typeof admins.$inferSelect;
 export type NewAdmin = typeof admins.$inferInsert;
 export type AdminSession = typeof adminSessions.$inferSelect;
+export type Article = typeof articles.$inferSelect;
+export type NewArticle = typeof articles.$inferInsert;

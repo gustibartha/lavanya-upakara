@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { CountUp } from "@/components/motion/CountUp";
 import { DupaSmoke } from "@/components/motion/DupaSmoke";
 import { HeroShowcase } from "@/components/landing/HeroShowcase";
@@ -18,6 +19,9 @@ export function Hero() {
   return (
     <section className="hero container">
       <div className="hero-bg-pattern"></div>
+      <div className="hero-mandala" aria-hidden="true">
+        <Image src="/images/motion/mandala-bali.png" alt="" fill sizes="(max-width: 900px) 90vw, 760px" priority />
+      </div>
       <DupaSmoke />
       <div className="hero-inner">
         <div className="hero-text">

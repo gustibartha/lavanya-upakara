@@ -1,9 +1,13 @@
-/** Pembatas bermotif ukiran — garis emas yang terbuka saat masuk layar. */
+import Image from "next/image";
+
+/** Pembatas bermotif ukiran patra — garis emas yang terbuka saat masuk layar. */
 export function OrnamentDivider() {
   return (
     <div className="ornament-divider" aria-hidden="true">
       <span className="ornament-line" />
-      <span className="ornament-mark">✦</span>
+      <span className="ornament-patra">
+        <Image src="/images/motion/patra-bali.png" alt="" width={176} height={89} />
+      </span>
       <span className="ornament-line" />
     </div>
   );

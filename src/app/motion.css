@@ -221,15 +221,48 @@ html[data-motion] .stagger-6 { --rv-delay: calc(var(--beat) * 6); }
 }
 .ornament-divider.in-view .ornament-line { transform: scaleX(1); }
 
-.ornament-mark {
-  font-size: 1.05rem;
-  line-height: 1;
-  color: var(--emas);
-  animation: markBreathe 4.5s ease-in-out infinite;
+/* Ukiran patra (dibuat di Canva) — mekar dari tengah saat masuk layar,
+   lalu "bernapas" pelan seperti nyala pelita. */
+.ornament-patra {
+  display: flex;
+  flex-shrink: 0;
+  width: clamp(110px, 16vw, 176px);
+  opacity: 0;
+  transform: scale(0.6) translateY(6px);
+  transition: opacity 0.9s var(--ease-alun) 0.35s, transform 0.9s var(--ease-alun) 0.35s;
 }
-@keyframes markBreathe {
-  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.75; }
-  50%      { transform: scale(1.18) rotate(45deg); opacity: 1; }
+.ornament-patra img { width: 100%; height: auto; }
+.ornament-divider.in-view .ornament-patra {
+  opacity: 1;
+  transform: none;
+  animation: patraBreathe 5s ease-in-out 1.3s infinite;
+}
+@keyframes patraBreathe {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(232, 184, 74, 0)); }
+  50%      { transform: scale(1.05); filter: drop-shadow(0 0 10px rgba(232, 184, 74, 0.45)); }
+}
+
+/* Mandala ukiran Bali (dibuat di Canva) — berputar sangat pelan di
+   belakang relung sesajen, satu putaran penuh tiap 2 menit. */
+.hero { isolation: isolate; }
+.hero-mandala {
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  right: -6%;
+  width: min(760px, 62vw);
+  aspect-ratio: 1;
+  translate: 0 -50%;
+  opacity: 0.16;
+  pointer-events: none;
+  animation: mandalaSpin 120s linear infinite;
+  mask-image: radial-gradient(circle, #000 55%, transparent 72%);
+}
+@keyframes mandalaSpin {
+  to { rotate: 360deg; }
+}
+@media (max-width: 900px) {
+  .hero-mandala { right: 50%; translate: 50% -50%; width: 120vw; opacity: 0.1; }
 }
 
 /* Pita poleng (kain hitam-putih sakral) yang bergeser pelan */
@@ -571,6 +604,8 @@ html[data-motion] .stagger-6 { --rv-delay: calc(var(--beat) * 6); }
   }
   .jepun-field,
   .dupa-smoke { display: none; }
+  .hero-mandala { animation: none; }
+  .ornament-patra { opacity: 1; transform: none; animation: none; }
   .hero-title .word { opacity: 1; animation: none; }
   .hero-title .word-accent::after { transform: scaleX(1); opacity: 0.85; animation: none; }
 

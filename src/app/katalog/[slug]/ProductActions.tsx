@@ -1,52 +1,55 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
+import type { ProdukKatalog } from "@/lib/katalog";
 
-interface ProductActionsProps {
-  product: any;
-  store: any;
-}
+const MAKS = 99;
 
-export function ProductActions({ product, store }: ProductActionsProps) {
+export function ProductActions({ product }: { product: ProdukKatalog }) {
+  const router = useRouter();
   const { addToCart, setIsCartOpen } = useCart();
   const [quantity, setQuantity] = useState(1);
 
+  const item = { ...product, image: product.image ?? undefined };
+
   const handleAddToCart = () => {
-    addToCart({ ...product, nama_toko: store?.nama_toko }, quantity);
+    addToCart(item, quantity);
   };
 
   const handleBuyNow = () => {
-    addToCart({ ...product, nama_toko: store?.nama_toko }, quantity);
-    setIsCartOpen(true);
+    addToCart(item, quantity);
+    setIsCartOpen(false);
+    router.push("/checkout");
   };
 
   return (
     <div className="product-actions-container">
       <div className="product-qty-selector">
-        <label>Jumlah:</label>
+        <label htmlFor="qty">Jumlah:</label>
         <div className="qty-controls">
-          <button onClick={() => setQuantity(Math.max(1, quantity - 1))}>-</button>
-          <input 
-            type="number" 
-            value={quantity} 
-            readOnly
-          />
-          <button onClick={() => setQuantity(quantity + 1)}>+</button>
+          <button
+            aria-label="Kurangi jumlah"
+            onClick={() => setQuantity(Math.max(1, quantity - 1))}
+          >
+            -
+          </button>
+          <input id="qty" type="number" value={quantity} readOnly />
+          <button
+            aria-label="Tambah jumlah"
+            onClick={() => setQuantity(Math.min(MAKS, quantity + 1))}
+          >
+            +
+          </button>
         </div>
       </div>
 
       <div className="product-detail-actions">
-        <button 
-          className="btn-primary product-btn-cart"
-          onClick={handleAddToCart}
-        >
+        <button className="btn-primary product-btn-cart" onClick={handleAddToCart}>
           🛒 Tambah ke Keranjang
         </button>
-        <button 
-          className="btn-ghost product-btn-buy"
-          onClick={handleBuyNow}
-        >
+        <button className="btn-ghost product-btn-buy" onClick={handleBuyNow}>
           Beli Sekarang →
         </button>
       </div>

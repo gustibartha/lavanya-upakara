@@ -1,37 +1,32 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useCart } from "@/context/CartContext";
-import { getProductBySlug, getStoreById } from "@/lib/data";
+import { formatRupiah } from "@/lib/data";
 import { useFavorites } from "@/lib/use-favorites";
+import type { ProdukKatalog } from "@/lib/katalog";
 
-export function FeaturedProducts() {
-  const [filter, setFilter] = useState("Semua");
+const TAB = ["Populer", "Termurah", "Terbaru"] as const;
+type Tab = (typeof TAB)[number];
+
+export function FeaturedProducts({ produk }: { produk: ProdukKatalog[] }) {
+  const [filter, setFilter] = useState<Tab>("Populer");
   const { addToCart } = useCart();
 
   // Belum ada wishlist di server, jadi tombol hati ini menyimpan pilihan
   // di perangkat pembeli saja — daripada dibiarkan mati.
   const { favorites, toggleFavorite } = useFavorites();
 
-  /**
-   * Kartu di bawah memakai data ringkas untuk tampilan, tapi keranjang harus
-   * berisi produk asli — checkout mengirim id-nya ke server dan pesanan akan
-   * ditolak kalau id itu tidak ada di katalog.
-   */
-  const handleAddToCart = (slug: string) => {
-    const product = getProductBySlug(slug);
-    if (!product) return;
-    const store = getStoreById(product.store_id);
-    addToCart({ ...product, nama_toko: store?.nama_toko }, 1);
-  };
+  const tampil = useMemo(() => {
+    if (filter === "Termurah") return [...produk].sort((a, b) => a.harga - b.harga).slice(0, 4);
+    if (filter === "Terbaru")
+      return [...produk].sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 4);
+    const populer = produk.filter((p) => p.populer);
+    return (populer.length >= 4 ? populer : [...populer, ...produk.filter((p) => !p.populer)]).slice(0, 4);
+  }, [produk, filter]);
 
-  const products = [
-    { id: 1, slug: "canang-sari-harian", name: "Canang Sari Segar", price: 15000, store: "Toko Sari Ayu", rating: 4.9, sold: "2.1k", image: "/images/products/canang-sari-harian.png", color: "#FBF0DC" },
-    { id: 2, slug: "dupa-harum-pandan", name: "Dupa Maharaja Pandan", price: 25000, store: "Dharma Upakara", rating: 4.8, sold: "850", image: "/images/products/dupa-harum-pandan.png", color: "#E4F0EA" },
-    { id: 3, slug: "dulang-kayu-cendana", name: "Dulang Fiber 30cm", price: 120000, store: "Griya Sesajen", rating: 4.9, sold: "340", image: "/images/products/dulang-kayu-cendana.png", color: "#FAE7E1" },
-    { id: 4, slug: "buah-sesajen-komplit", name: "Paket Buah Pejati", price: 85000, store: "Banten Jaya Sempurna", rating: 4.7, sold: "120", image: "/images/products/buah-sesajen-komplit.png", color: "#FBF5DC" },
-  ];
+  if (produk.length === 0) return null;
 
   return (
     <section className="products-section container" id="produk">
@@ -39,33 +34,24 @@ export function FeaturedProducts() {
         <div className="section-header anim-fadeup" data-reveal="left" style={{ marginBottom: 0 }}>
           <div className="section-tag">Rekomendasi</div>
           <h2 className="section-title">Pilihan Produk Terbaik</h2>
-          <p className="section-sub">Produk-produk dengan rating tinggi dan harga bersahabat.</p>
+          <p className="section-sub">Sarana upacara pilihan dari toko-toko mitra kami.</p>
         </div>
-        
+
         <div className="product-filter-tabs anim-fadeup stagger-1">
-          <button 
-            className={`filter-tab ${filter === "Semua" ? "active" : ""}`}
-            onClick={() => setFilter("Semua")}
-          >
-            Semua
-          </button>
-          <button 
-            className={`filter-tab ${filter === "Terlaris" ? "active" : ""}`}
-            onClick={() => setFilter("Terlaris")}
-          >
-            Terlaris
-          </button>
-          <button 
-            className={`filter-tab ${filter === "Diskon" ? "active" : ""}`}
-            onClick={() => setFilter("Diskon")}
-          >
-            Diskon
-          </button>
+          {TAB.map((t) => (
+            <button
+              key={t}
+              className={`filter-tab ${filter === t ? "active" : ""}`}
+              onClick={() => setFilter(t)}
+            >
+              {t}
+            </button>
+          ))}
         </div>
       </div>
 
       <div className="products-grid" id="productsGrid">
-        {products.map((prod, i) => (
+        {tampil.map((prod, i) => (
           <div key={prod.id} className={`product-card anim-fadeup stagger-${(i % 5) + 1}`}>
             <button
               className="wishlist-btn"
@@ -73,33 +59,40 @@ export function FeaturedProducts() {
               aria-pressed={favorites.includes(prod.slug)}
               aria-label={
                 favorites.includes(prod.slug)
-                  ? `Hapus ${prod.name} dari favorit`
-                  : `Simpan ${prod.name} ke favorit`
+                  ? `Hapus ${prod.nama_produk} dari favorit`
+                  : `Simpan ${prod.nama_produk} ke favorit`
               }
               title={favorites.includes(prod.slug) ? "Hapus dari favorit" : "Simpan ke favorit"}
             >
               {favorites.includes(prod.slug) ? "❤️" : "🤍"}
             </button>
             <Link href={`/katalog/${prod.slug}`}>
-              <div className="product-card-img" style={{ background: prod.color, padding: 0 }}>
-                <img src={prod.image} alt={prod.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <div className="product-card-img" style={{ background: prod.bg_color, padding: 0 }}>
+                {prod.image ? (
+                  <img
+                    src={prod.image}
+                    alt={prod.nama_produk}
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                ) : (
+                  <span className="katalog-card-emoji" aria-hidden="true">{prod.emoji}</span>
+                )}
               </div>
             </Link>
             <div className="product-card-body">
-              <div className="product-store">{prod.store}</div>
+              <div className="product-store">{prod.nama_toko}</div>
               <Link href={`/katalog/${prod.slug}`}>
-                <h3 className="product-name">{prod.name}</h3>
+                <h3 className="product-name">{prod.nama_produk}</h3>
               </Link>
               <div className="product-rating">
-                <span className="stars">★★★★★</span>
-                <span>{prod.rating} | {prod.sold} terjual</span>
+                <span>{prod.kategori}</span>
               </div>
               <div className="product-footer">
-                <span className="product-price">Rp {prod.price.toLocaleString('id-ID')}</span>
+                <span className="product-price">{formatRupiah(prod.harga)}</span>
                 <button
                   className="product-add-btn"
-                  onClick={() => handleAddToCart(prod.slug)}
-                  aria-label={`Tambah ${prod.name} ke keranjang`}
+                  onClick={() => addToCart({ ...prod, image: prod.image ?? undefined }, 1)}
+                  aria-label={`Tambah ${prod.nama_produk} ke keranjang`}
                   title="Tambah ke keranjang"
                 >
                   +
@@ -109,7 +102,7 @@ export function FeaturedProducts() {
           </div>
         ))}
       </div>
-      
+
       <div style={{ textAlign: "center", marginTop: "3rem" }} className="anim-fadeup">
         <Link href="/katalog" className="btn btn-primary btn-lg">Jelajahi Semua Produk</Link>
       </div>

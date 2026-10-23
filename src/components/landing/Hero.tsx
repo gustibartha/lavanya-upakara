@@ -15,7 +15,7 @@ const TITLE_WORDS: { text: string; accent?: boolean; em?: boolean }[] = [
   { text: "Layarmu" },
 ];
 
-export function Hero() {
+export function Hero({ jumlahToko, jumlahProduk }: { jumlahToko: number; jumlahProduk: number }) {
   return (
     <section className="hero container">
       <div className="hero-bg-pattern"></div>
@@ -27,7 +27,7 @@ export function Hero() {
         <div className="hero-text">
           <div className="hero-badge anim-fadeup">
             <div className="hero-badge-dot"></div>
-            Marketplace Sarana Upacara #1 di Jabodetabek
+            Marketplace Sarana Upacara Hindu di Jabodetabek
           </div>
           <h1 className="hero-title">
             {TITLE_WORDS.map((word, i) => (
@@ -57,14 +57,14 @@ export function Hero() {
           <div className="hero-stats anim-fadeup stagger-4">
             <div className="hero-stat">
               <span className="hero-stat-num">
-                <CountUp to={500} suffix="+" />
+                <CountUp to={jumlahToko} />
               </span>
-              <span className="hero-stat-label">Toko Terdaftar</span>
+              <span className="hero-stat-label">Toko Mitra</span>
             </div>
             <div className="hero-stat-divider"></div>
             <div className="hero-stat">
               <span className="hero-stat-num">
-                <CountUp to={1.2} decimals={1} suffix="K" />
+                <CountUp to={jumlahProduk} />
               </span>
               <span className="hero-stat-label">Produk Tersedia</span>
             </div>

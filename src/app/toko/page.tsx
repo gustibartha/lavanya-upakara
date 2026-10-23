@@ -40,7 +40,14 @@ interface StoreData {
 }
 
 export default function TokoPage() {
-  const [selectedStore, setSelectedStore] = useState<string | null>(null);
+  // `?id=` dari tombol "Lihat di Peta" di halaman produk. Aman dibaca saat
+  // inisialisasi: daftar toko dan peta baru muncul setelah data dimuat di
+  // browser, jadi render server dan klien tetap sama.
+  const [selectedStore, setSelectedStore] = useState<string | null>(() =>
+    typeof window === "undefined"
+      ? null
+      : new URLSearchParams(window.location.search).get("id"),
+  );
   const [stores, setStores] = useState<StoreData[]>([]);
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState<{

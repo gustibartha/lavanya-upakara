@@ -1,136 +1,166 @@
-// POST /api/orders — Create a new order
+// POST /api/orders — membuat pesanan dari isi keranjang.
+//
+// Satu keranjang bisa berisi produk dari beberapa toko. Tiap toko
+// memproses dan mengirim pesanannya sendiri, jadi keranjang dipecah menjadi
+// satu pesanan per toko — bukan dicatat semuanya atas nama satu toko.
 
 import db from "@/db";
 import { orders, orderItems, products } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { randomUUID } from "crypto";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 interface OrderItemInput {
-  product_id: string;
-  jumlah: number;
+  product_id?: unknown;
+  jumlah?: unknown;
 }
 
 interface OrderInput {
-  user_id: string;
-  store_id: string;
-  items: OrderItemInput[];
-  jalan: string;
-  kelurahan: string;
-  kecamatan: string;
-  kota: string;
-  provinsi: string;
+  items?: OrderItemInput[];
+  jalan?: string;
+  kelurahan?: string;
+  kecamatan?: string;
+  kota?: string;
+  provinsi?: string;
   kodepos?: string;
-  shipping_method: string;
+  shipping_method?: string;
   shipping_service?: string;
   catatan?: string;
   metode_bayar?: string;
 }
 
-export async function POST(request: Request) {
-  try {
-    const body = (await request.json()) as OrderInput;
+const MAKS_JUMLAH_PER_PRODUK = 99;
+const MAKS_JENIS_PRODUK = 50;
 
-    if (!body.user_id || !body.store_id || !body.items?.length) {
+export async function POST(request: Request) {
+  // Pemilik pesanan diambil dari sesi, bukan dari isi permintaan — kalau
+  // tidak, siapa pun bisa membuat pesanan atas nama akun orang lain.
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) {
+    return Response.json({ error: "Silakan masuk terlebih dahulu" }, { status: 401 });
+  }
+
+  let body: OrderInput;
+  try {
+    body = (await request.json()) as OrderInput;
+  } catch {
+    return Response.json({ error: "Body tidak valid" }, { status: 400 });
+  }
+
+  if (!Array.isArray(body.items) || body.items.length === 0) {
+    return Response.json({ error: "Keranjang kosong" }, { status: 400 });
+  }
+  if (body.items.length > MAKS_JENIS_PRODUK) {
+    return Response.json({ error: "Terlalu banyak jenis produk" }, { status: 400 });
+  }
+
+  // Produk yang sama yang muncul dua kali digabung jumlahnya.
+  const jumlahPerProduk = new Map<string, number>();
+  for (const item of body.items) {
+    const jumlah = Number(item.jumlah);
+    if (typeof item.product_id !== "string" || !Number.isInteger(jumlah) || jumlah < 1) {
+      return Response.json({ error: "Jumlah produk tidak valid" }, { status: 400 });
+    }
+    const total = (jumlahPerProduk.get(item.product_id) ?? 0) + jumlah;
+    if (total > MAKS_JUMLAH_PER_PRODUK) {
       return Response.json(
-        { error: "user_id, store_id, dan items wajib diisi" },
-        { status: 400 }
+        { error: `Maksimal ${MAKS_JUMLAH_PER_PRODUK} per produk dalam satu pesanan` },
+        { status: 400 },
+      );
+    }
+    jumlahPerProduk.set(item.product_id, total);
+  }
+
+  const shippingMethod = body.shipping_method === "delivery" ? "delivery" : "pickup";
+  if (shippingMethod === "delivery" && (!body.jalan?.trim() || !body.kota?.trim())) {
+    return Response.json({ error: "Alamat pengiriman belum lengkap" }, { status: 400 });
+  }
+
+  // Hanya dua metode yang dikenal; nilai lain diperlakukan sebagai COD.
+  const metodeBayar = body.metode_bayar === "midtrans" ? "midtrans" : "cod";
+
+  try {
+    const idProduk = [...jumlahPerProduk.keys()];
+    const daftarProduk = await db
+      .select()
+      .from(products)
+      .where(and(inArray(products.id, idProduk), eq(products.aktif, true)));
+
+    if (daftarProduk.length !== idProduk.length) {
+      return Response.json(
+        {
+          error:
+            "Sebagian produk di keranjang sudah tidak tersedia. Hapus produk tersebut dari keranjang lalu coba lagi.",
+          produk_tidak_tersedia: idProduk.filter(
+            (id) => !daftarProduk.some((p) => p.id === id),
+          ),
+        },
+        { status: 409 },
       );
     }
 
-    // Calculate total from product prices
-    let totalHarga = 0;
-    const itemsWithPrice: Array<OrderItemInput & { harga_satuan: number }> = [];
-
-    for (const item of body.items) {
-      const [product] = await db
-        .select()
-        .from(products)
-        .where(eq(products.id, item.product_id))
-        .limit(1);
-
-      if (!product) {
-        return Response.json(
-          { error: `Produk ${item.product_id} tidak ditemukan` },
-          { status: 404 }
-        );
-      }
-
-      totalHarga += product.harga * item.jumlah;
-      itemsWithPrice.push({ ...item, harga_satuan: product.harga });
+    // Harga selalu diambil dari database — harga yang dikirim browser
+    // tidak pernah dipercaya.
+    const perToko = new Map<string, typeof daftarProduk>();
+    for (const p of daftarProduk) {
+      perToko.set(p.store_id, [...(perToko.get(p.store_id) ?? []), p]);
     }
 
-    // Hanya dua metode yang dikenal; nilai lain diperlakukan sebagai COD.
-    const metodeBayar = body.metode_bayar === "midtrans" ? "midtrans" : "cod";
+    const pesananDibuat = [];
+    for (const [storeId, produkToko] of perToko) {
+      const orderId = `order-${randomUUID().slice(0, 8)}`;
+      const totalHarga = produkToko.reduce(
+        (sum, p) => sum + p.harga * jumlahPerProduk.get(p.id)!,
+        0,
+      );
 
-    const orderId = `order-${randomUUID().slice(0, 8)}`;
+      await db.insert(orders).values({
+        id: orderId,
+        user_id: session.user.id,
+        store_id: storeId,
+        total_harga: totalHarga,
+        status: "menunggu",
+        jalan: shippingMethod === "pickup" ? "Ambil di Toko" : body.jalan?.trim() || null,
+        kelurahan: body.kelurahan || null,
+        kecamatan: body.kecamatan || null,
+        kota: body.kota || null,
+        provinsi: body.provinsi || null,
+        kodepos: body.kodepos || null,
+        shipping_method: shippingMethod,
+        shipping_service: shippingMethod === "delivery" ? body.shipping_service || null : null,
+        catatan: body.catatan?.trim().slice(0, 500) || null,
+        metode_bayar: metodeBayar,
+        status_bayar: "belum_bayar",
+      });
 
-    // Insert order
-    await db.insert(orders).values({
-      id: orderId,
-      user_id: body.user_id,
-      store_id: body.store_id,
-      total_harga: totalHarga,
-      status: "menunggu",
-      jalan: body.jalan || null,
-      kelurahan: body.kelurahan || null,
-      kecamatan: body.kecamatan || null,
-      kota: body.kota || null,
-      provinsi: body.provinsi || null,
-      kodepos: body.kodepos || null,
-      shipping_method: body.shipping_method || "pickup",
-      shipping_service: body.shipping_service || null,
-      catatan: body.catatan || null,
-      metode_bayar: metodeBayar,
-      status_bayar: "belum_bayar",
-    });
+      await db.insert(orderItems).values(
+        produkToko.map((p) => ({
+          id: `oi-${randomUUID().slice(0, 8)}`,
+          order_id: orderId,
+          product_id: p.id,
+          jumlah: jumlahPerProduk.get(p.id)!,
+          harga_satuan: p.harga,
+        })),
+      );
 
-    // Insert order items
-    for (const item of itemsWithPrice) {
-      await db.insert(orderItems).values({
-        id: `oi-${randomUUID().slice(0, 8)}`,
-        order_id: orderId,
-        product_id: item.product_id,
-        jumlah: item.jumlah,
-        harga_satuan: item.harga_satuan,
+      pesananDibuat.push({
+        id: orderId,
+        store_id: storeId,
+        total_harga: totalHarga,
+        status: "menunggu",
+        metode_bayar: metodeBayar,
+        status_bayar: "belum_bayar",
+        items: produkToko.length,
       });
     }
 
     return Response.json(
-      {
-        order: {
-          id: orderId,
-          total_harga: totalHarga,
-          status: "menunggu",
-          metode_bayar: metodeBayar,
-          status_bayar: "belum_bayar",
-          items: itemsWithPrice.length,
-        },
-        message: "Pesanan berhasil dibuat! 🙏",
-      },
-      { status: 201 }
+      { orders: pesananDibuat, message: "Pesanan berhasil dibuat! 🙏" },
+      { status: 201 },
     );
   } catch (error) {
     console.error("Order creation error:", error);
-    return Response.json(
-      { error: "Gagal membuat pesanan" },
-      { status: 500 }
-    );
+    return Response.json({ error: "Gagal membuat pesanan" }, { status: 500 });
   }
-}
-
-// GET /api/orders?user_id=user-1
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const userId = searchParams.get("user_id");
-
-  if (!userId) {
-    return Response.json({ error: "user_id wajib diisi" }, { status: 400 });
-  }
-
-  const userOrders = await db
-    .select()
-    .from(orders)
-    .where(eq(orders.user_id, userId));
-
-  return Response.json({ orders: userOrders, total: userOrders.length });
 }

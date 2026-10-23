@@ -14,9 +14,16 @@ const MIDTRANS_SNAP_URL =
     ? "https://app.midtrans.com/snap/snap.js"
     : "https://app.sandbox.midtrans.com/snap/snap.js";
 
+interface CreatedOrder {
+  id: string;
+  store_id: string;
+  total_harga: number;
+  metode_bayar: string;
+}
+
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cartItems, cartTotal, clearCart, isInitialized } = useCart();
+  const { cartItems, cartTotal, clearCart, removeFromCart, isInitialized } = useCart();
   const { data: session, isPending } = authClient.useSession();
 
   const [jalan, setJalan] = useState("");
@@ -36,6 +43,8 @@ export default function CheckoutPage() {
   const [note, setNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState<any>(null);
+  const [createdOrders, setCreatedOrders] = useState<CreatedOrder[]>([]);
+  const jumlahToko = new Set(cartItems.map((item) => item.store_id)).size;
 
   // Opsi pembayaran online hanya ditawarkan kalau Client Key sudah dipasang,
   // supaya tidak ada tombol yang menuntun ke jalan buntu.
@@ -191,11 +200,7 @@ export default function CheckoutPage() {
         return;
       }
 
-      const storeId = cartItems[0].store_id; 
-      
       const payload = {
-        user_id: session.user.id,
-        store_id: storeId,
         items: cartItems.map(item => ({
           product_id: item.id,
           jumlah: item.quantity
@@ -221,6 +226,16 @@ export default function CheckoutPage() {
       const data = await response.json();
 
       if (!response.ok) {
+        if (Array.isArray(data.produk_tidak_tersedia)) {
+          const habis = cartItems.filter((i) => data.produk_tidak_tersedia.includes(i.id));
+          habis.forEach((i) => removeFromCart(i.id));
+          alert(
+            `Produk berikut sudah tidak tersedia dan dihapus dari keranjang: ${habis
+              .map((i) => i.nama_produk)
+              .join(", ")}. Periksa kembali keranjang Anda lalu pesan ulang.`,
+          );
+          return;
+        }
         alert("Gagal: " + (data.error || "Terjadi kesalahan pada server"));
         return;
       }
@@ -229,12 +244,22 @@ export default function CheckoutPage() {
       // kalau pembayaran batal, pesanannya tetap bisa dibayar dari Riwayat.
       clearCart();
 
-      if (paymentMethod === "midtrans") {
-        await startMidtransPayment(data.order);
+      const dibuat: CreatedOrder[] = data.orders;
+      setCreatedOrders(dibuat);
+
+      // Keranjang multi-toko menghasilkan beberapa pesanan; masing-masing
+      // dibayar dari halaman Riwayat, bukan dibuka Snap berturut-turut.
+      if (paymentMethod === "midtrans" && dibuat.length === 1) {
+        await startMidtransPayment(dibuat[0]);
         return;
       }
 
-      setOrderSuccess(data.order);
+      if (paymentMethod === "midtrans") {
+        setPaymentNotice(
+          `Pesanan Anda dipecah menjadi ${dibuat.length} pesanan karena berasal dari ${dibuat.length} toko berbeda. Bayar masing-masing lewat tombol di bawah.`,
+        );
+      }
+      setOrderSuccess(dibuat[0]);
     } catch (error) {
       console.error("Checkout error:", error);
       alert("Terjadi kesalahan koneksi");
@@ -258,12 +283,33 @@ export default function CheckoutPage() {
         <h1 className="success-title">Pesanan Berhasil!</h1>
         <p className="success-subtitle">
           Terima kasih telah memesan sarana sembahyang di Lavanya Upakara.
-          Nomor pesanan Anda: <strong>{orderSuccess.id}</strong>
+          {createdOrders.length > 1 ? (
+            <> Pesanan Anda dikirim ke <strong>{createdOrders.length} toko</strong> berbeda.</>
+          ) : (
+            <> Nomor pesanan Anda: <strong>{orderSuccess.id}</strong></>
+          )}
         </p>
         {paymentNotice && <p className="payment-notice">{paymentNotice}</p>}
+        {createdOrders.length > 1 && (
+          <ul className="success-order-list">
+            {createdOrders.map((o) => (
+              <li key={o.id}>
+                <span>
+                  <strong>{o.id}</strong> · {formatRupiah(o.total_harga)}
+                </span>
+                <Link href={`/riwayat/${o.id}`} className="btn-ghost">
+                  {o.metode_bayar === "midtrans" ? "Bayar →" : "Lihat →"}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
         <div className="success-actions">
-          <Link href={`/riwayat/${orderSuccess.id}`} className="btn-primary">
-            Lihat Pesanan
+          <Link
+            href={createdOrders.length > 1 ? "/riwayat" : `/riwayat/${orderSuccess.id}`}
+            className="btn-primary"
+          >
+            {createdOrders.length > 1 ? "Lihat Semua Pesanan" : "Lihat Pesanan"}
           </Link>
           <Link href="/katalog" className="btn-ghost">
             Belanja Lagi
@@ -524,13 +570,22 @@ export default function CheckoutPage() {
           <div className="checkout-summary-side">
             <div className="checkout-card sticky-top">
               <h2 className="card-title">Ringkasan Belanja</h2>
-              
+
+              {jumlahToko > 1 && (
+                <p className="checkout-multistore-note">
+                  🏪 Keranjang berisi produk dari {jumlahToko} toko. Pesanan akan
+                  dipecah menjadi {jumlahToko} pesanan — tiap toko memproses dan
+                  mengirim pesanannya sendiri.
+                </p>
+              )}
+
               <div className="checkout-items-list mb-6">
                 {cartItems.map((item) => (
                   <div key={item.id} className="checkout-item">
                     <span className="item-emoji">{item.emoji}</span>
                     <div className="item-details">
                       <span className="item-name">{item.nama_produk}</span>
+                      {jumlahToko > 1 && <span className="item-meta">{item.nama_toko}</span>}
                       <span className="item-meta">{item.quantity}x @ {formatRupiah(item.harga)}</span>
                     </div>
                     <span className="item-subtotal">{formatRupiah(item.harga * item.quantity)}</span>

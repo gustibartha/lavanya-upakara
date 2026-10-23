@@ -28,6 +28,9 @@ interface CartContextType {
   setIsCartOpen: (isOpen: boolean) => void;
 }
 
+// Sama dengan batas di POST /api/orders.
+const MAKS_PER_PRODUK = 99;
+
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
@@ -65,7 +68,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (existingItem) {
         return prevItems.map((item) =>
           item.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
+            ? { ...item, quantity: Math.min(item.quantity + quantity, MAKS_PER_PRODUK) }
             : item
         );
       }
@@ -79,7 +82,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           emoji: product.emoji,
           image: product.image,
           bg_color: product.bg_color,
-          quantity: quantity,
+          quantity: Math.min(quantity, MAKS_PER_PRODUK),
           store_id: product.store_id,
           nama_toko: product.nama_toko || "Toko",
         },
@@ -99,7 +102,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
     setCartItems((prevItems) =>
       prevItems.map((item) =>
-        item.id === productId ? { ...item, quantity } : item
+        item.id === productId ? { ...item, quantity: Math.min(quantity, MAKS_PER_PRODUK) } : item
       )
     );
   };

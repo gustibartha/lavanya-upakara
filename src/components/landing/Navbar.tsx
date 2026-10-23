@@ -126,9 +126,6 @@ export function Navbar() {
                   <Link href="/riwayat" className="nav-dropdown-item" onClick={() => setDropdownOpen(false)}>
                     📜 Riwayat Pesanan
                   </Link>
-                  <Link href="/profil" className="nav-dropdown-item" onClick={() => setDropdownOpen(false)}>
-                    👤 Profil Saya
-                  </Link>
                   <button className="nav-dropdown-item" onClick={handleSignOut}>
                     🚪 Keluar
                   </button>
@@ -186,9 +183,6 @@ export function Navbar() {
                 </div>
                 <Link href="/riwayat" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>
                   📜 Riwayat Pesanan
-                </Link>
-                <Link href="/profil" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>
-                  👤 Profil Saya
                 </Link>
                 <button className="mobile-menu-link text-danger" onClick={handleSignOut}>
                   🚪 Keluar

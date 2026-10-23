@@ -1,6 +1,6 @@
 import { google } from "@ai-sdk/google";
 import { streamText } from "ai";
-import { products } from "@/lib/data";
+import { ambilProdukKatalog } from "@/lib/katalog";
 
 // Set max duration for Vercel Edge/Serverless functions
 export const maxDuration = 30;
@@ -9,9 +9,10 @@ export async function POST(req: Request) {
   try {
     const { messages } = await req.json();
     
-    // Format product catalog into a string for the AI context
-    const productCatalog = products
-      .map(p => `- [PROD:${p.slug}] ${p.nama_produk} (Rp ${p.harga.toLocaleString('id-ID')})`)
+    // Katalog dari database, supaya asisten tidak menyarankan produk yang
+    // sudah dinonaktifkan dan ikut mengenal produk baru dari panel admin.
+    const productCatalog = (await ambilProdukKatalog())
+      .map(p => `- [PROD:${p.slug}] ${p.nama_produk} (Rp ${p.harga.toLocaleString('id-ID')}, ${p.nama_toko})`)
       .join("\n");
 
     const systemPrompt = `Kamu adalah Asisten Lavanya, customer service digital untuk Lavanya Upakara (platform khusus perlengkapan sembahyang Hindu Bali).

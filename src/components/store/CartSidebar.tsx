@@ -123,7 +123,7 @@ export function CartSidebar() {
               <span className="cart-total-price">{formatRupiah(cartTotal)}</span>
             </div>
             <p className="cart-footer-note">
-              * Harga belum termasuk ongkir & biaya layanan
+              * Harga belum termasuk ongkir
             </p>
             <div className="cart-footer-btns">
               <button

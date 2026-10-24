@@ -7,6 +7,14 @@ import { formatRupiah } from "@/lib/data";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Script from "next/script";
+import dynamic from "next/dynamic";
+import type { Titik } from "@/components/store/LocationPicker";
+
+// Leaflet menyentuh `window` saat dimuat, jadi hanya di-render di browser.
+const LocationPicker = dynamic(
+  () => import("@/components/store/LocationPicker").then((m) => m.LocationPicker),
+  { ssr: false, loading: () => <div className="location-picker-map location-picker-loading">Memuat peta…</div> },
+);
 
 const MIDTRANS_CLIENT_KEY = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY;
 const MIDTRANS_SNAP_URL =
@@ -38,6 +46,7 @@ export default function CheckoutPage() {
   const [selectedVillage, setSelectedVillage] = useState("");
 
   const [kodepos, setKodepos] = useState("");
+  const [titikAntar, setTitikAntar] = useState<Titik | null>(null);
   const [shippingMethod, setShippingMethod] = useState("delivery"); // pickup | delivery
   const [shippingService, setShippingService] = useState("gojek"); // gojek | grab | paxel
   const [note, setNote] = useState("");
@@ -185,6 +194,10 @@ export default function CheckoutPage() {
       alert("Silakan lengkapi alamat pengiriman");
       return;
     }
+    if (shippingMethod === "delivery" && !titikAntar) {
+      alert("Tandai titik antar di peta supaya kurir bisa menemukan alamat Anda.");
+      return;
+    }
 
     setIsSubmitting(true);
     
@@ -213,6 +226,8 @@ export default function CheckoutPage() {
         kodepos,
         shipping_method: shippingMethod,
         shipping_service: shippingMethod === "delivery" ? shippingService : null,
+        lokasi_lat: shippingMethod === "delivery" ? titikAntar?.lat : undefined,
+        lokasi_lng: shippingMethod === "delivery" ? titikAntar?.lng : undefined,
         catatan: note,
         metode_bayar: paymentMethod
       };
@@ -404,6 +419,11 @@ export default function CheckoutPage() {
                       </label>
                     ))}
                   </div>
+                  <p className="checkout-ongkir-note">
+                    🛵 Kurir dipesan oleh tim kami setelah pesanan disiapkan toko.
+                    Ongkir belum termasuk dalam total — biaya dan cara bayarnya
+                    akan kami konfirmasi lewat WhatsApp sebelum kurir berangkat.
+                  </p>
                 </div>
               )}
             </div>
@@ -492,6 +512,11 @@ export default function CheckoutPage() {
                     value={kodepos}
                     onChange={(e) => setKodepos(e.target.value)}
                   />
+                </div>
+
+                <div className="checkout-field full">
+                  <label>Titik Antar di Peta</label>
+                  <LocationPicker value={titikAntar} onChange={setTitikAntar} />
                 </div>
               </div>
             </div>

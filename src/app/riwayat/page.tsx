@@ -6,7 +6,7 @@ import { formatRupiah } from "@/lib/data";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { useCart } from "@/context/CartContext";
-import { PAYMENT_STATUS, nomorPesanan } from "@/lib/order-status";
+import { ORDER_STATUS, PAYMENT_STATUS, nomorPesanan } from "@/lib/order-status";
 
 export default function RiwayatPage() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -51,25 +51,8 @@ export default function RiwayatPage() {
     setIsCartOpen(true);
   };
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "menunggu": return "Menunggu Konfirmasi";
-      case "diproses": return "Sedang Diproses";
-      case "dikirim": return "Dalam Pengiriman";
-      case "selesai": return "Pesanan Selesai";
-      default: return status;
-    }
-  };
-
-  const getStatusClass = (status: string) => {
-    switch (status) {
-      case "menunggu": return "status-pending";
-      case "diproses": return "status-process";
-      case "dikirim": return "status-shipping";
-      case "selesai": return "status-done";
-      default: return "";
-    }
-  };
+  const getStatusLabel = (status: string) => ORDER_STATUS[status]?.label ?? status;
+  const getStatusClass = (status: string) => ORDER_STATUS[status]?.className ?? "";
 
   return (
     <>

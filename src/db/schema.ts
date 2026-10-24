@@ -93,7 +93,7 @@ export const orders = pgTable("orders", {
     .notNull()
     .references(() => stores.id),
   total_harga: integer("total_harga").notNull(),
-  status: text("status").notNull().default("menunggu"), // menunggu | diproses | dikirim | selesai
+  status: text("status").notNull().default("menunggu"), // menunggu | diproses | dikirim | selesai | dibatalkan
   jalan: text("jalan"),
   kelurahan: text("kelurahan"),
   kecamatan: text("kecamatan"),
@@ -103,6 +103,16 @@ export const orders = pgTable("orders", {
   shipping_method: text("shipping_method"), // pickup | delivery
   shipping_service: text("shipping_service"), // gojek | grab | paxel
   catatan: text("catatan"),
+
+  // --- Pengiriman (kurir dipesan manual oleh admin) ---
+  // Titik antar dari pin peta di checkout. Kurir instan (GoSend,
+  // GrabExpress) butuh koordinat, bukan hanya alamat tertulis.
+  lokasi_lat: doublePrecision("lokasi_lat"),
+  lokasi_lng: doublePrecision("lokasi_lng"),
+  // Diisi admin setelah memesan kurir. Ongkir terpisah dari total_harga,
+  // jadi tidak ikut dihitung komisi platform.
+  ongkir: integer("ongkir"),
+  tracking_url: text("tracking_url"),
 
   // --- Pembayaran ---
   metode_bayar: text("metode_bayar").notNull().default("cod"), // cod | midtrans

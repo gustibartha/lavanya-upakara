@@ -7,7 +7,7 @@ import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { formatRupiah } from "@/lib/data";
 import { MidtransPayButton } from "@/components/store/MidtransPayButton";
-import { PAYMENT_STATUS, PAYABLE, labelMetodeBayar, nomorPesanan } from "@/lib/order-status";
+import { PAYMENT_STATUS, PAYABLE, labelMetodeBayar, nomorPesanan, trackingUrlAman } from "@/lib/order-status";
 import {
   Package,
   CheckCircle2,
@@ -173,7 +173,7 @@ export default function OrderDetailPage() {
                     })}
                     {" "}· {new Date(order.created_at).toLocaleTimeString("id-ID", {
                       hour: "2-digit", minute: "2-digit",
-                    })} WITA
+                    })} WIB
                   </div>
                 </div>
 
@@ -183,7 +183,14 @@ export default function OrderDetailPage() {
                     <Truck size={20} /> Status Pengiriman
                   </h2>
 
-                  <div className="delivery-timeline">
+                  {order.status === "dibatalkan" && (
+                    <div className="order-cancelled-note">
+                      ❌ Pesanan ini dibatalkan. Hubungi kami lewat WhatsApp bila ada pertanyaan
+                      {order.status_bayar === "dibayar" ? " — dana yang sudah dibayar akan dikembalikan." : "."}
+                    </div>
+                  )}
+
+                  <div className="delivery-timeline" hidden={order.status === "dibatalkan"}>
                     {STATUS_STEPS.map((step, idx) => {
                       const done = idx <= currentStepIndex;
                       const active = idx === currentStepIndex;
@@ -211,7 +218,7 @@ export default function OrderDetailPage() {
                               <div className="timeline-step-time">
                                 {new Date(order.created_at).toLocaleTimeString("id-ID", {
                                   hour: "2-digit", minute: "2-digit",
-                                })} WITA
+                                })} WIB
                               </div>
                             )}
                           </div>
@@ -231,6 +238,26 @@ export default function OrderDetailPage() {
                       <div className="kurir-badge">
                         {order.status === "dikirim" ? "Sedang antar" : order.status === "selesai" ? "Terkirim ✓" : "Menunggu pickup"}
                       </div>
+                    </div>
+                  )}
+                  {order.shipping_method === "delivery" && order.status !== "dibatalkan" && (
+                    <div className="delivery-ongkir-info">
+                      <span>
+                        Ongkir:{" "}
+                        <strong>
+                          {order.ongkir != null ? formatRupiah(order.ongkir) : "dikonfirmasi admin via WhatsApp"}
+                        </strong>
+                      </span>
+                      {trackingUrlAman(order.tracking_url) && (
+                        <a
+                          href={trackingUrlAman(order.tracking_url)!}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn btn-primary delivery-track-btn"
+                        >
+                          📍 Lacak Pengiriman
+                        </a>
+                      )}
                     </div>
                   )}
                   {order.shipping_method === "pickup" && (

@@ -9,7 +9,29 @@ export const ORDER_STATUS: Record<string, { label: string; className: string }> 
   diproses: { label: "Sedang Diproses", className: "status-process" },
   dikirim: { label: "Dalam Pengiriman", className: "status-shipping" },
   selesai: { label: "Pesanan Selesai", className: "status-done" },
+  dibatalkan: { label: "Dibatalkan", className: "status-cancelled" },
 };
+
+/** Urutan normal sebuah pesanan; "dibatalkan" bisa terjadi sebelum selesai. */
+export const STATUS_BERIKUTNYA: Record<string, string | null> = {
+  menunggu: "diproses",
+  diproses: "dikirim",
+  dikirim: "selesai",
+  selesai: null,
+  dibatalkan: null,
+};
+
+/** Link pelacakan dari admin ditampilkan ke pembeli sebagai tautan, jadi
+ *  hanya alamat http(s) yang diterima — bukan `javascript:` dan sejenisnya. */
+export function trackingUrlAman(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    return u.protocol === "https:" || u.protocol === "http:" ? u.toString() : null;
+  } catch {
+    return null;
+  }
+}
 
 /** Status pembayaran — apakah dananya sudah diterima. Terpisah dari status
  *  pesanan, karena pesanan COD bisa diproses meski belum dibayar. */

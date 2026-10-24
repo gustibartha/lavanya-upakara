@@ -26,6 +26,8 @@ interface OrderInput {
   kodepos?: string;
   shipping_method?: string;
   shipping_service?: string;
+  lokasi_lat?: unknown;
+  lokasi_lng?: unknown;
   catatan?: string;
   metode_bayar?: string;
 }
@@ -75,6 +77,16 @@ export async function POST(request: Request) {
   const shippingMethod = body.shipping_method === "delivery" ? "delivery" : "pickup";
   if (shippingMethod === "delivery" && (!body.jalan?.trim() || !body.kota?.trim())) {
     return Response.json({ error: "Alamat pengiriman belum lengkap" }, { status: 400 });
+  }
+
+  // Kurir instan butuh titik koordinat. Batasnya kira-kira wilayah
+  // Indonesia, sekadar menolak nilai yang jelas salah.
+  const lat = Number(body.lokasi_lat);
+  const lng = Number(body.lokasi_lng);
+  const titikValid =
+    Number.isFinite(lat) && Number.isFinite(lng) && lat >= -11 && lat <= 6 && lng >= 95 && lng <= 141;
+  if (shippingMethod === "delivery" && !titikValid) {
+    return Response.json({ error: "Tandai titik antar di peta" }, { status: 400 });
   }
 
   // Hanya dua metode yang dikenal; nilai lain diperlakukan sebagai COD.
@@ -129,6 +141,8 @@ export async function POST(request: Request) {
         kodepos: body.kodepos || null,
         shipping_method: shippingMethod,
         shipping_service: shippingMethod === "delivery" ? body.shipping_service || null : null,
+        lokasi_lat: shippingMethod === "delivery" ? lat : null,
+        lokasi_lng: shippingMethod === "delivery" ? lng : null,
         catatan: body.catatan?.trim().slice(0, 500) || null,
         metode_bayar: metodeBayar,
         status_bayar: "belum_bayar",

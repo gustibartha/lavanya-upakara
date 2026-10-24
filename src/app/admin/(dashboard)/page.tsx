@@ -92,13 +92,13 @@ export default async function AdminDashboardPage() {
             <div className="admin-stat-label">Toko Terdaftar</div>
           </div>
         </div>
-        <div className="admin-stat-card admin-stat-highlight">
+        <Link href="/admin/pesanan" className="admin-stat-card admin-stat-highlight admin-stat-link">
           <div className="admin-stat-icon">⏳</div>
           <div>
             <div className="admin-stat-num">{pesananMenunggu.n}</div>
             <div className="admin-stat-label">Pesanan Menunggu Konfirmasi</div>
           </div>
-        </div>
+        </Link>
         <div className="admin-stat-card">
           <div className="admin-stat-icon">✅</div>
           <div>
@@ -161,7 +161,12 @@ export default async function AdminDashboardPage() {
         </div>
 
         <div className="admin-dash-panel">
-          <h2 className="admin-dash-panel-title">Pesanan Terbaru</h2>
+          <div className="admin-dash-panel-header">
+            <h2 className="admin-dash-panel-title">Pesanan Terbaru</h2>
+            <Link href="/admin/pesanan" className="admin-link-btn">
+              Kelola →
+            </Link>
+          </div>
           {pesananTerbaru.length === 0 ? (
             <p className="admin-table-empty" style={{ padding: "1.5rem 0" }}>
               Belum ada pesanan.
@@ -219,7 +224,10 @@ export default async function AdminDashboardPage() {
       </div>
 
       <div className="admin-quick-actions">
-        <Link href="/admin/produk" className="btn-primary">
+        <Link href="/admin/pesanan" className="btn-primary">
+          📦 Kelola Pesanan
+        </Link>
+        <Link href="/admin/produk" className="btn-outline">
           🛍️ Kelola Produk
         </Link>
         <Link href="/admin/artikel" className="btn-outline">

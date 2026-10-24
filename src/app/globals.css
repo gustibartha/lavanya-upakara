@@ -1819,6 +1819,7 @@ footer { background: var(--malam); color: var(--muted); padding: 4rem 0 2rem; ma
 .status-process { background: #e5f1ff; color: #0056b4; }
 .status-shipping { background: #e5ffe8; color: #008a12; }
 .status-done { background: #f0f0f0; color: #666; }
+.status-cancelled { background: #fdecea; color: #a8321f; }
 
 .order-store {
   display: flex;
@@ -2930,6 +2931,76 @@ footer { background: var(--malam); color: var(--muted); padding: 4rem 0 2rem; ma
 .admin-link-btn:hover { color: var(--bata); text-decoration: underline; }
 .admin-link-btn:disabled { color: var(--muted); cursor: default; }
 .admin-table-empty { text-align: center; color: var(--muted); padding: 2.5rem 1rem !important; }
+
+/* --- Kelola Pesanan --- */
+.admin-badge-status-dibatalkan { background: var(--bata-lite); color: var(--bata); }
+.admin-cell-sub { font-size: 0.74rem; color: var(--muted); margin-top: 0.2rem; }
+.admin-text-warn { color: var(--kunyit); font-weight: 600; }
+.admin-text-danger { color: var(--bata); }
+.admin-pesanan-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+.admin-pesanan-tab {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.45rem 1rem; border-radius: 100px; border: 1px solid var(--border);
+  background: var(--white); font-size: 0.82rem; font-weight: 600; color: var(--coklat-mid); cursor: pointer;
+}
+.admin-pesanan-tab.active { background: var(--bata); border-color: var(--bata); color: var(--white); }
+.admin-pesanan-count {
+  min-width: 20px; height: 20px; padding: 0 6px; border-radius: 100px;
+  background: var(--kunyit); color: var(--white); font-size: 0.7rem;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.admin-pesanan-detail { margin: 0.25rem 0; }
+.admin-pesanan-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.admin-pesanan-grid h3 {
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--muted); margin: 0 0 0.5rem;
+}
+.admin-pesanan-grid h3:not(:first-child) { margin-top: 1.1rem; }
+.admin-pesanan-grid p { font-size: 0.85rem; line-height: 1.55; color: var(--coklat); }
+.admin-pesanan-items { display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.85rem; }
+.admin-pesanan-items li { display: flex; justify-content: space-between; gap: 1rem; }
+.admin-pesanan-total { border-top: 1px dashed var(--border); padding-top: 0.4rem; font-weight: 700; }
+.admin-pesanan-note { margin-top: 0.75rem; background: var(--krem); border-radius: 10px; padding: 0.6rem 0.75rem; }
+.admin-pesanan-links { display: flex; flex-direction: column; align-items: flex-start; gap: 0.35rem; margin-top: 0.5rem; }
+.admin-pesanan-links a { font-size: 0.82rem; font-weight: 600; color: var(--kunyit); }
+.admin-pesanan-links a:hover { color: var(--bata); text-decoration: underline; }
+.admin-pesanan-form { grid-template-columns: 1fr; }
+.admin-wa-btn {
+  display: inline-flex; align-items: center; gap: 0.35rem; margin-top: 0.4rem;
+  padding: 0.4rem 0.85rem; border-radius: 100px; font-size: 0.78rem; font-weight: 600;
+  background: #e7f7ed; color: #1a7f45;
+}
+.admin-wa-btn:hover { background: #d3f0de; }
+@media (max-width: 900px) {
+  .admin-pesanan-grid { grid-template-columns: 1fr; }
+}
+
+/* --- Pin lokasi di checkout --- */
+.location-picker { display: flex; flex-direction: column; gap: 0.5rem; }
+.location-picker-bar { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; font-size: 0.8rem; color: var(--coklat-mid); }
+.location-picker-gps {
+  padding: 0.4rem 0.9rem; border-radius: 100px; border: 1px solid var(--border);
+  background: var(--white); font-size: 0.78rem; font-weight: 600; color: var(--kunyit); cursor: pointer;
+}
+.location-picker-gps:disabled { color: var(--muted); cursor: default; }
+.location-picker-map { height: 280px; border-radius: 14px; overflow: hidden; border: 1px solid var(--border); z-index: 0; }
+.location-picker-loading { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 0.85rem; background: var(--krem); }
+.location-picker-msg { font-size: 0.78rem; color: var(--bata); }
+.checkout-ongkir-note {
+  margin-top: 0.9rem; font-size: 0.8rem; line-height: 1.5; color: var(--coklat-mid);
+  background: var(--kunyit-lite); border-radius: 12px; padding: 0.7rem 0.9rem;
+}
+
+/* --- Ongkir & pelacakan di detail pesanan pembeli --- */
+.delivery-ongkir-info {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;
+  margin-top: 0.75rem; font-size: 0.85rem; color: var(--coklat);
+}
+.delivery-track-btn { padding: 0.5rem 1.1rem; font-size: 0.82rem; }
+.order-cancelled-note {
+  background: var(--bata-lite); color: var(--bata); border-radius: 12px;
+  padding: 0.85rem 1rem; font-size: 0.85rem; line-height: 1.5; margin-bottom: 1rem;
+}
 
 @media (max-width: 900px) {
   .admin-nav { flex-wrap: wrap; gap: 1rem; }

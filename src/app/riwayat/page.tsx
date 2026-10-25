@@ -119,7 +119,7 @@ export default function RiwayatPage() {
 
                     <div className="order-total-section">
                       <div className="total-label">Total Pembayaran</div>
-                      <div className="total-amount">{formatRupiah(order.total_harga)}</div>
+                      <div className="total-amount">{formatRupiah(order.total_harga + (order.ongkir ?? 0))}</div>
                     </div>
                   </div>
 

@@ -9,6 +9,7 @@ import Link from "next/link";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import type { Titik } from "@/components/store/LocationPicker";
+import { ONGKIR_MINIMUM, TARIF_PER_KM } from "@/lib/ongkir";
 
 // Leaflet menyentuh `window` saat dimuat, jadi hanya di-render di browser.
 const LocationPicker = dynamic(
@@ -21,6 +22,14 @@ const MIDTRANS_SNAP_URL =
   process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === "true"
     ? "https://app.midtrans.com/snap/snap.js"
     : "https://app.sandbox.midtrans.com/snap/snap.js";
+
+interface OngkirToko {
+  store_id: string;
+  nama_toko: string;
+  jarak_km: number;
+  ongkir: number;
+  terjangkau: boolean;
+}
 
 interface CreatedOrder {
   id: string;
@@ -47,8 +56,7 @@ export default function CheckoutPage() {
 
   const [kodepos, setKodepos] = useState("");
   const [titikAntar, setTitikAntar] = useState<Titik | null>(null);
-  const [shippingMethod, setShippingMethod] = useState("delivery"); // pickup | delivery
-  const [shippingService, setShippingService] = useState("gojek"); // gojek | grab | paxel
+  const [shippingMethod, setShippingMethod] = useState("pickup"); // pickup | delivery
   const [note, setNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState<any>(null);
@@ -59,6 +67,36 @@ export default function CheckoutPage() {
   // supaya tidak ada tombol yang menuntun ke jalan buntu.
   const midtransReady = Boolean(MIDTRANS_CLIENT_KEY);
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "midtrans">("cod");
+  // Pesanan antar selalu dibayar online (barang + ongkir di depan).
+  const metodeBayar = shippingMethod === "delivery" ? "midtrans" : paymentMethod;
+
+  // Perkiraan ongkir per toko dari server untuk titik antar yang dipilih.
+  // `kunci` mencegah angka lama tampil saat pin atau isi keranjang berubah.
+  const [ongkirInfo, setOngkirInfo] = useState<{ kunci: string; toko: OngkirToko[] } | null>(null);
+  const storeIds = [...new Set(cartItems.map((i) => i.store_id))].sort();
+  const kunciOngkir = titikAntar ? `${titikAntar.lat},${titikAntar.lng}|${storeIds.join(",")}` : "";
+  useEffect(() => {
+    if (shippingMethod !== "delivery" || !kunciOngkir) return;
+    const [titik, ids] = kunciOngkir.split("|");
+    const [lat, lng] = titik.split(",").map(Number);
+    let batal = false;
+    fetch("/api/ongkir", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lat, lng, store_ids: ids.split(",") }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (!batal && Array.isArray(data.toko)) setOngkirInfo({ kunci: kunciOngkir, toko: data.toko });
+      })
+      .catch(() => {});
+    return () => {
+      batal = true;
+    };
+  }, [shippingMethod, kunciOngkir]);
+  const ongkirSiap = Boolean(ongkirInfo && ongkirInfo.kunci === kunciOngkir);
+  const totalOngkir = ongkirSiap ? ongkirInfo!.toko.reduce((s, t) => s + t.ongkir, 0) : 0;
+  const adaTokoTerlaluJauh = ongkirSiap && ongkirInfo!.toko.some((t) => !t.terjangkau);
   const [paymentNotice, setPaymentNotice] = useState<string | null>(null);
 
   // Fetch Provinces on mount
@@ -198,6 +236,14 @@ export default function CheckoutPage() {
       alert("Tandai titik antar di peta supaya kurir bisa menemukan alamat Anda.");
       return;
     }
+    if (shippingMethod === "delivery" && !ongkirSiap) {
+      alert("Ongkir masih dihitung, tunggu sebentar lalu coba lagi.");
+      return;
+    }
+    if (shippingMethod === "delivery" && adaTokoTerlaluJauh) {
+      alert('Alamat terlalu jauh dari salah satu toko untuk diantar. Pilih "Ambil Sendiri".');
+      return;
+    }
 
     setIsSubmitting(true);
     
@@ -225,11 +271,11 @@ export default function CheckoutPage() {
         provinsi: provinceName,
         kodepos,
         shipping_method: shippingMethod,
-        shipping_service: shippingMethod === "delivery" ? shippingService : null,
+        shipping_service: null,
         lokasi_lat: shippingMethod === "delivery" ? titikAntar?.lat : undefined,
         lokasi_lng: shippingMethod === "delivery" ? titikAntar?.lng : undefined,
         catatan: note,
-        metode_bayar: paymentMethod
+        metode_bayar: metodeBayar
       };
 
       const response = await fetch("/api/orders", {
@@ -264,12 +310,12 @@ export default function CheckoutPage() {
 
       // Keranjang multi-toko menghasilkan beberapa pesanan; masing-masing
       // dibayar dari halaman Riwayat, bukan dibuka Snap berturut-turut.
-      if (paymentMethod === "midtrans" && dibuat.length === 1) {
+      if (metodeBayar === "midtrans" && dibuat.length === 1) {
         await startMidtransPayment(dibuat[0]);
         return;
       }
 
-      if (paymentMethod === "midtrans") {
+      if (metodeBayar === "midtrans") {
         setPaymentNotice(
           `Pesanan Anda dipecah menjadi ${dibuat.length} pesanan karena berasal dari ${dibuat.length} toko berbeda. Bayar masing-masing lewat tombol di bawah.`,
         );
@@ -379,52 +425,44 @@ export default function CheckoutPage() {
                     <span className="option-emoji">🏪</span>
                     <div className="option-info">
                       <div className="option-name">Ambil Sendiri</div>
-                      <div className="option-desc">Ambil langsung di toko mitra</div>
+                      <div className="option-desc">Ambil di toko — bisa bayar di tempat</div>
                     </div>
                   </div>
                 </label>
 
-                <label className={`shipping-option ${shippingMethod === 'delivery' ? 'active' : ''}`}>
+                <label
+                  className={`shipping-option ${shippingMethod === 'delivery' ? 'active' : ''} ${!midtransReady ? 'disabled' : ''}`}
+                >
                   <input
                     type="radio"
                     name="shippingMethod"
                     value="delivery"
                     checked={shippingMethod === 'delivery'}
                     onChange={(e) => setShippingMethod(e.target.value)}
+                    disabled={!midtransReady}
                   />
                   <div className="option-content">
                     <span className="option-emoji">🛵</span>
                     <div className="option-info">
                       <div className="option-name">Kirim Ke Alamat</div>
-                      <div className="option-desc">Dikirim kurir ke pintu rumahmu</div>
+                      <div className="option-desc">
+                        {midtransReady
+                          ? "Diantar kurir, ongkir dihitung otomatis"
+                          : "Belum tersedia — butuh pembayaran online"}
+                      </div>
                     </div>
                   </div>
                 </label>
               </div>
 
               {shippingMethod === 'delivery' && (
-                <div className="delivery-services mt-6">
-                  <h3 className="text-sm font-bold mb-3">Pilih Layanan Pengiriman:</h3>
-                  <div className="services-grid">
-                    {['gojek', 'grab', 'paxel'].map((service) => (
-                      <label key={service} className={`service-chip ${shippingService === service ? 'active' : ''}`}>
-                        <input
-                          type="radio"
-                          name="shippingService"
-                          value={service}
-                          checked={shippingService === service}
-                          onChange={(e) => setShippingService(e.target.value)}
-                        />
-                        <span className="capitalize">{service}</span>
-                      </label>
-                    ))}
-                  </div>
-                  <p className="checkout-ongkir-note">
-                    🛵 Kurir dipesan oleh tim kami setelah pesanan disiapkan toko.
-                    Ongkir belum termasuk dalam total — biaya dan cara bayarnya
-                    akan kami konfirmasi lewat WhatsApp sebelum kurir berangkat.
-                  </p>
-                </div>
+                <p className="checkout-ongkir-note">
+                  🛵 Diantar kurir instan (GoSend/GrabExpress) yang kami pesankan.
+                  Ongkir dihitung otomatis dari jarak toko ke titik antar
+                  (Rp {TARIF_PER_KM.toLocaleString("id-ID")}/km, minimal Rp{" "}
+                  {ONGKIR_MINIMUM.toLocaleString("id-ID")}) dan dibayar online bersama
+                  pesanan.
+                </p>
               )}
             </div>
 
@@ -536,38 +574,46 @@ export default function CheckoutPage() {
             <div className="checkout-card mt-6">
               <h2 className="card-title">💳 Metode Pembayaran</h2>
               <div className="payment-options">
-                <label
-                  className={`payment-option ${paymentMethod === "cod" ? "active" : ""}`}
-                >
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="cod"
-                    checked={paymentMethod === "cod"}
-                    onChange={() => setPaymentMethod("cod")}
-                  />
-                  <div className="payment-radio">
-                    {paymentMethod === "cod" ? "✓" : ""}
+                {shippingMethod === "delivery" ? (
+                  <div className="payment-option disabled">
+                    <div className="payment-radio-off"></div>
+                    <div className="payment-info">
+                      <span className="payment-name">Bayar di Tempat (COD)</span>
+                      <span className="payment-desc">
+                        Hanya untuk ambil di toko — kurir tidak menerima pembayaran tunai
+                      </span>
+                    </div>
                   </div>
-                  <div className="payment-info">
-                    <span className="payment-name">Bayar di Tempat (COD)</span>
-                    <span className="payment-desc">Bayar tunai saat barang sampai</span>
-                  </div>
-                </label>
+                ) : (
+                  <label className={`payment-option ${metodeBayar === "cod" ? "active" : ""}`}>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="cod"
+                      checked={metodeBayar === "cod"}
+                      onChange={() => setPaymentMethod("cod")}
+                    />
+                    <div className="payment-radio">{metodeBayar === "cod" ? "✓" : ""}</div>
+                    <div className="payment-info">
+                      <span className="payment-name">Bayar di Tempat (COD)</span>
+                      <span className="payment-desc">Bayar tunai saat mengambil di toko</span>
+                    </div>
+                  </label>
+                )}
 
                 {midtransReady ? (
                   <label
-                    className={`payment-option ${paymentMethod === "midtrans" ? "active" : ""}`}
+                    className={`payment-option ${metodeBayar === "midtrans" ? "active" : ""}`}
                   >
                     <input
                       type="radio"
                       name="paymentMethod"
                       value="midtrans"
-                      checked={paymentMethod === "midtrans"}
+                      checked={metodeBayar === "midtrans"}
                       onChange={() => setPaymentMethod("midtrans")}
                     />
                     <div className="payment-radio">
-                      {paymentMethod === "midtrans" ? "✓" : ""}
+                      {metodeBayar === "midtrans" ? "✓" : ""}
                     </div>
                     <div className="payment-info">
                       <span className="payment-name">
@@ -624,12 +670,30 @@ export default function CheckoutPage() {
                   <span>{formatRupiah(cartTotal)}</span>
                 </div>
                 <div className="total-row">
-                  <span>Biaya Pengiriman</span>
-                  <span className="text-free">GRATIS</span>
+                  <span>Ongkos Kirim</span>
+                  {shippingMethod === "pickup" ? (
+                    <span className="text-free">Ambil di toko</span>
+                  ) : !titikAntar ? (
+                    <span className="text-muted">Tandai titik antar</span>
+                  ) : !ongkirSiap ? (
+                    <span className="text-muted">Menghitung…</span>
+                  ) : (
+                    <span>{formatRupiah(totalOngkir)}</span>
+                  )}
                 </div>
+                {shippingMethod === "delivery" && ongkirSiap && ongkirInfo!.toko.length > 0 && (
+                  <div className="checkout-ongkir-detail">
+                    {ongkirInfo!.toko.map((t) => (
+                      <div key={t.store_id} className={t.terjangkau ? "" : "checkout-ongkir-jauh"}>
+                        {t.nama_toko} · ±{t.jarak_km} km
+                        {t.terjangkau ? ` · ${formatRupiah(t.ongkir)}` : " · terlalu jauh untuk diantar"}
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <div className="total-row grand-total mt-4">
                   <span>Total Pembayaran</span>
-                  <span>{formatRupiah(cartTotal)}</span>
+                  <span>{formatRupiah(cartTotal + (shippingMethod === "delivery" ? totalOngkir : 0))}</span>
                 </div>
               </div>
 

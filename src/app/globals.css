@@ -2983,6 +2983,11 @@ footer { background: var(--malam); color: var(--muted); padding: 4rem 0 2rem; ma
   background: #e7f7ed; color: #1a7f45;
 }
 .admin-wa-btn:hover { background: #d3f0de; }
+.admin-langkah {
+  margin-top: 1.25rem; padding: 0.85rem 1rem; border-radius: 12px;
+  background: var(--kunyit-lite); border: 1px solid rgba(200, 105, 10, 0.25);
+  font-size: 0.85rem; line-height: 1.55; color: var(--coklat);
+}
 @media (max-width: 900px) {
   .admin-pesanan-grid { grid-template-columns: 1fr; }
 }
@@ -3002,6 +3007,11 @@ footer { background: var(--malam); color: var(--muted); padding: 4rem 0 2rem; ma
   margin-top: 0.9rem; font-size: 0.8rem; line-height: 1.5; color: var(--coklat-mid);
   background: var(--kunyit-lite); border-radius: 12px; padding: 0.7rem 0.9rem;
 }
+.shipping-option.disabled { opacity: 0.5; cursor: not-allowed; }
+.checkout-ongkir-detail { font-size: 0.75rem; color: var(--muted); margin: -0.25rem 0 0.5rem; display: flex; flex-direction: column; gap: 0.15rem; }
+.checkout-ongkir-jauh { color: var(--bata); font-weight: 600; }
+.order-subtotal-rows { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 0.75rem; font-size: 0.85rem; color: var(--coklat-mid); }
+.order-subtotal-rows > div { display: flex; justify-content: space-between; }
 
 /* --- Ongkir & pelacakan di detail pesanan pembeli --- */
 .delivery-ongkir-info {

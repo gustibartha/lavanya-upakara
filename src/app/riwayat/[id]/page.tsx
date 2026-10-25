@@ -95,11 +95,12 @@ export default function OrderDetailPage() {
 
   const [gantiCod, setGantiCod] = useState(false);
   const gantiKeCod = () => {
-    const pesan =
-      order?.shipping_method === "delivery"
-        ? "Ganti pembayaran ke COD? Anda membayar tunai saat pesanan diantar. Kode pembayaran online sebelumnya akan dibatalkan."
-        : "Ganti pembayaran ke COD? Anda membayar tunai saat mengambil pesanan di toko. Kode pembayaran online sebelumnya akan dibatalkan.";
-    if (!window.confirm(pesan)) return;
+    if (
+      !window.confirm(
+        "Ganti pembayaran ke COD? Anda membayar tunai saat mengambil pesanan di toko. Kode pembayaran online sebelumnya akan dibatalkan.",
+      )
+    )
+      return;
     setGantiCod(true);
     fetch(`/api/orders/${id}`, {
       method: "PATCH",
@@ -266,12 +267,11 @@ export default function OrderDetailPage() {
                   )}
                   {order.shipping_method === "delivery" && order.status !== "dibatalkan" && (
                     <div className="delivery-ongkir-info">
-                      <span>
-                        Ongkir:{" "}
-                        <strong>
-                          {order.ongkir != null ? formatRupiah(order.ongkir) : "dikonfirmasi admin via WhatsApp"}
-                        </strong>
-                      </span>
+                      {!trackingUrlAman(order.tracking_url) && (
+                        <span className="muted">
+                          Link pelacakan kurir muncul di sini setelah kurir dipesan.
+                        </span>
+                      )}
                       {trackingUrlAman(order.tracking_url) && (
                         <a
                           href={trackingUrlAman(order.tracking_url)!}
@@ -385,6 +385,12 @@ export default function OrderDetailPage() {
 
                   {/* Total */}
                   <div className="order-total-divider" />
+                  {order.ongkir > 0 && (
+                    <div className="order-subtotal-rows">
+                      <div><span>Subtotal barang</span><span>{formatRupiah(order.total_harga)}</span></div>
+                      <div><span>Ongkos kirim</span><span>{formatRupiah(order.ongkir)}</span></div>
+                    </div>
+                  )}
                   <div className="order-grand-total-row">
                     <div>
                       <div className="order-total-label">Total Pembayaran</div>
@@ -405,7 +411,9 @@ export default function OrderDetailPage() {
                         </button>
                       )}
                     </div>
-                    <div className="order-grand-total">{formatRupiah(order.total_harga)}</div>
+                    <div className="order-grand-total">
+                      {formatRupiah(order.total_harga + (order.ongkir ?? 0))}
+                    </div>
                   </div>
                 </div>
 
@@ -432,7 +440,8 @@ export default function OrderDetailPage() {
                   )}
                   {order.metode_bayar === "midtrans" &&
                     PAYABLE.has(order.status_bayar) &&
-                    order.status === "menunggu" && (
+                    order.status === "menunggu" &&
+                    order.shipping_method === "pickup" && (
                       <button
                         type="button"
                         className="btn btn-outline w-full"

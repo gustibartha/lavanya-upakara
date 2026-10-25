@@ -29,7 +29,14 @@ export interface StatusMidtrans {
  * `changed: false`) kalau pesanan sudah lunas dan status barunya bukan
  * refund — pesanan yang sudah lunas hanya boleh berubah lewat refund.
  */
-export async function applyMidtransStatus(order: Order, info: StatusMidtrans) {
+export async function applyMidtransStatus(
+  order: Order,
+  info: StatusMidtrans,
+  /** Referensi transaksi yang dilaporkan, kalau berbeda dari yang tersimpan
+   *  (pembeli membayar percobaan lama). Disimpan supaya refund/sinkron
+   *  berikutnya menanyakan transaksi yang benar. */
+  midtransOrderId?: string,
+) {
   const statusBayar = mapTransactionStatus(
     info.transaction_status ?? "",
     info.fraud_status,
@@ -59,6 +66,7 @@ export async function applyMidtransStatus(order: Order, info: StatusMidtrans) {
     .update(orders)
     .set({
       status_bayar: statusBayar,
+      ...(midtransOrderId ? { midtrans_order_id: midtransOrderId } : {}),
       midtrans_transaction_id: info.transaction_id ?? null,
       payment_type: info.payment_type ?? null,
       paid_at: paidAt,

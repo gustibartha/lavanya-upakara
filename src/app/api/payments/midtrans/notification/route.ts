@@ -8,7 +8,12 @@
 import { db } from "@/db";
 import { orders } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { isMidtransConfigured, isValidSignature } from "@/lib/midtrans";
+import {
+  idPesananDariMidtrans,
+  isMidtransConfigured,
+  isValidSignature,
+  mapTransactionStatus,
+} from "@/lib/midtrans";
 import { applyMidtransStatus } from "@/lib/apply-payment-status";
 
 interface MidtransNotification {
@@ -64,15 +69,47 @@ export async function POST(request: Request) {
   const midtransOrderId = payload.order_id!;
 
   try {
-    const order = await db.query.orders.findFirst({
+    let order = await db.query.orders.findFirst({
       where: eq(orders.midtrans_order_id, midtransOrderId),
     });
+
+    // Tiap kali pembeli membuka pembayaran lagi (mis. ganti metode setelah
+    // salah memilih QRIS), referensi tersimpan diganti yang baru. Notifikasi
+    // untuk percobaan sebelumnya tetap harus dikenali: kalau QRIS lama
+    // ternyata dibayar, uangnya sudah masuk dan pesanan wajib jadi lunas.
+    let percobaanLama = false;
+    if (!order) {
+      order = await db.query.orders.findFirst({
+        where: eq(orders.id, idPesananDariMidtrans(midtransOrderId)),
+      });
+      percobaanLama = Boolean(order);
+    }
 
     if (!order) {
       // Dibalas 200 supaya Midtrans berhenti mengulang notifikasi untuk
       // referensi yang memang tidak kita kenali.
       console.warn("Notifikasi untuk order tidak dikenal:", midtransOrderId);
       return Response.json({ message: "Pesanan tidak dikenal" });
+    }
+
+    if (percobaanLama) {
+      const status = mapTransactionStatus(
+        payload.transaction_status ?? "",
+        payload.fraud_status,
+      );
+      // Kedaluwarsa/batal dari percobaan lama tidak boleh menimpa status
+      // percobaan yang sedang berjalan — hanya pelunasan yang dicatat.
+      if (status !== "dibayar") {
+        return Response.json({ message: "Percobaan pembayaran lama diabaikan" });
+      }
+      const hasil = await applyMidtransStatus(
+        order,
+        { ...payload, transaction_status: payload.transaction_status ?? "" },
+        midtransOrderId,
+      );
+      return Response.json({
+        message: hasil.changed ? "Notifikasi diterima" : "Status sudah final",
+      });
     }
 
     // Notifikasi bisa datang berkali-kali dan tidak selalu berurutan; aturan

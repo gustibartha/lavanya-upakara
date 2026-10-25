@@ -177,6 +177,28 @@ export async function getTransactionStatus(
 }
 
 /**
+ * Mengakhiri transaksi yang masih menunggu pembayaran (mis. kode QRIS yang
+ * sudah terbit), supaya tidak bisa dibayar lagi setelah pembeli memilih
+ * metode lain. Transaksi yang sudah lunas tidak terpengaruh — Midtrans
+ * menolak permintaan ini untuk transaksi yang statusnya sudah final.
+ */
+export async function expireTransaction(midtransOrderId: string): Promise<void> {
+  const endpoint = isMidtransProduction ? CORE_API_PRODUCTION : CORE_API_SANDBOX;
+  const auth = Buffer.from(`${serverKey()}:`).toString("base64");
+
+  await fetch(`${endpoint}/${encodeURIComponent(midtransOrderId)}/expire`, {
+    method: "POST",
+    headers: { Accept: "application/json", Authorization: `Basic ${auth}` },
+  });
+}
+
+/** Referensi Midtrans berbentuk `<id pesanan>-<akhiran acak>`; ini
+ *  mengembalikan id pesanan internal dari referensi tersebut. */
+export function idPesananDariMidtrans(midtransOrderId: string): string {
+  return midtransOrderId.replace(/-[a-z0-9]+$/, "");
+}
+
+/**
  * Memastikan notifikasi benar-benar datang dari Midtrans.
  *
  * Rumus tanda tangannya: sha512(order_id + status_code + gross_amount + server_key).

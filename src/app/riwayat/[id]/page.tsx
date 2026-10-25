@@ -394,11 +394,18 @@ export default function OrderDetailPage() {
                         onFinished={reloadOrder}
                         label={
                           order.status_bayar === "pending"
-                            ? "💳 Lanjutkan Pembayaran"
+                            ? "💳 Bayar / Ganti Metode Pembayaran"
                             : "💳 Bayar Sekarang"
                         }
                       />
                     )}
+                  {order.metode_bayar === "midtrans" && order.status_bayar === "pending" && (
+                    <p className="order-ganti-metode-note">
+                      Salah pilih metode (mis. QRIS)? Tekan tombol di atas lalu pilih metode
+                      lain. Kode pembayaran sebelumnya otomatis dibatalkan, jadi tidak
+                      akan tertagih dua kali.
+                    </p>
+                  )}
                   {order.status === "selesai" && (
                     <Link href="/katalog" className="btn btn-primary w-full">
                       🛍️ Pesan Lagi

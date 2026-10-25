@@ -39,7 +39,13 @@ export function AdminNav({ namaAdmin }: { namaAdmin: string }) {
         ))}
       </nav>
       <div className="admin-nav-user">
-        <span>{namaAdmin}</span>
+        <Link
+          href="/admin/akun"
+          className={`admin-nav-akun ${pathname === "/admin/akun" ? "active" : ""}`}
+          title="Akun & ganti kata sandi"
+        >
+          👤 {namaAdmin}
+        </Link>
         <button type="button" onClick={handleLogout} className="admin-logout-btn">
           Keluar
         </button>

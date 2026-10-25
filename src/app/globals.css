@@ -3009,6 +3009,14 @@ footer { background: var(--malam); color: var(--muted); padding: 4rem 0 2rem; ma
   margin-top: 0.75rem; font-size: 0.85rem; color: var(--coklat);
 }
 .delivery-track-btn { padding: 0.5rem 1.1rem; font-size: 0.82rem; }
+.admin-nav-akun { color: var(--coklat-mid); font-weight: 500; padding: 0.35rem 0.6rem; border-radius: 8px; }
+.admin-nav-akun:hover, .admin-nav-akun.active { color: var(--kunyit); background: var(--kunyit-lite); }
+.admin-sandi-form { max-width: 460px; display: flex; flex-direction: column; gap: 1rem; }
+.admin-form-success {
+  background: var(--pandan-lite); color: var(--pandan); border-radius: 10px;
+  padding: 0.7rem 0.9rem; font-size: 0.85rem;
+}
+.order-ganti-metode-note { font-size: 0.78rem; line-height: 1.5; color: var(--muted); text-align: center; }
 .order-cancelled-note {
   background: var(--bata-lite); color: var(--bata); border-radius: 12px;
   padding: 0.85rem 1rem; font-size: 0.85rem; line-height: 1.5; margin-bottom: 1rem;

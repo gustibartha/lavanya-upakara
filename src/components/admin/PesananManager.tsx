@@ -70,6 +70,31 @@ function linkWa(telepon: string | null | undefined, pesan: string) {
   return nomor ? `https://wa.me/${nomor}?text=${encodeURIComponent(pesan)}` : null;
 }
 
+/** Satu kalimat instruksi untuk admin, sesuai posisi pesanan saat ini. */
+function langkahBerikutnya(p: PesananAdmin, belumLunasOnline: boolean): string {
+  const delivery = p.shipping_method === "delivery";
+  if (p.status === "selesai") return "Pesanan selesai. Tidak ada yang perlu dilakukan. 🙏";
+  if (p.status === "dibatalkan") return "Pesanan dibatalkan.";
+  if (belumLunasOnline) {
+    return "Tunggu pembeli menyelesaikan pembayaran online. Tombol proses aktif otomatis setelah lunas.";
+  }
+  if (p.status === "menunggu") {
+    return "Tekan 💬 WhatsApp Toko untuk memastikan barang tersedia, lalu tekan ✓ Konfirmasi & Proses.";
+  }
+  if (p.status === "diproses" && delivery) {
+    return `Setelah toko siap, pesan GoSend/GrabExpress (Instant) di aplikasi: jemput di ${p.toko?.nama ?? "toko"}, antar ke titik dari tombol 📍 di atas. Tempel link lacak dari aplikasinya, lalu tekan 🛵 Tandai Dikirim.`;
+  }
+  if (p.status === "diproses") {
+    return p.metode_bayar === "cod"
+      ? "Kabari pembeli lewat 💬 WhatsApp bahwa pesanan siap diambil dan dibayar tunai di toko. Setelah diambil, tekan ✅ Sudah Diambil Pembeli."
+      : "Kabari pembeli lewat 💬 WhatsApp bahwa pesanan siap diambil. Setelah diambil, tekan ✅ Sudah Diambil Pembeli.";
+  }
+  if (p.status === "dikirim") {
+    return "Pantau kurir lewat aplikasinya. Setelah barang diterima pembeli, tekan ✅ Tandai Selesai.";
+  }
+  return "";
+}
+
 function alamatLengkap(p: PesananAdmin) {
   return [p.jalan, p.kelurahan, p.kecamatan, p.kota, p.provinsi, p.kodepos].filter(Boolean).join(", ");
 }
@@ -183,8 +208,11 @@ export function PesananManager({ pesananAwal }: { pesananAwal: PesananAdmin[] })
           <tbody>
             {tampil.map((p) => {
               const belumLunasOnline = p.metode_bayar === "midtrans" && p.status_bayar !== "dibayar";
-              const berikut = STATUS_BERIKUTNYA[p.status];
               const delivery = p.shipping_method === "delivery";
+              // Ambil di toko tidak melewati tahap "dikirim".
+              const berikut =
+                !delivery && p.status === "diproses" ? "selesai" : STATUS_BERIKUTNYA[p.status];
+              const ongkirTercatat = p.ongkir != null && pesananAwal.find((x) => x.id === p.id)?.ongkir != null;
               const pesanPembeli = `Om Swastyastu 🙏 Kami dari Lavanya Upakara, terkait pesanan #${nomorPesanan(p.id)}${
                 delivery
                   ? ` dengan pengiriman ${NAMA_KURIR[p.shipping_service ?? ""] ?? "kurir"}${
@@ -319,10 +347,15 @@ export function PesananManager({ pesananAwal }: { pesananAwal: PesananAdmin[] })
                                   <p className="admin-cell-sub">Pesanan lama — titik peta belum ada, pakai alamat tertulis.</p>
                                 )}
 
-                                <h3>Kurir</h3>
-                                <div className="admin-form-grid admin-pesanan-form">
+                                <h3>Ongkir</h3>
+                                {ongkirTercatat ? (
+                                  <p>
+                                    <strong>{formatRupiah(p.ongkir!)}</strong> — sudah dibayar pembeli
+                                    bersama pesanan. Pakai untuk membayar kurir.
+                                  </p>
+                                ) : (
                                   <div className="admin-form-field">
-                                    <label>Ongkir (Rp)</label>
+                                    <label>Ongkir (Rp) — pesanan lama, isi manual</label>
                                     <input
                                       inputMode="numeric"
                                       value={ongkir}
@@ -330,25 +363,25 @@ export function PesananManager({ pesananAwal }: { pesananAwal: PesananAdmin[] })
                                       placeholder="Cth: 18000"
                                     />
                                   </div>
+                                )}
+
+                                {(p.status === "diproses" || p.status === "dikirim") && (
                                   <div className="admin-form-field">
-                                    <label>Link pelacakan dari aplikasi Gojek/Grab</label>
+                                    <label>Link lacak dari aplikasi Gojek/Grab</label>
                                     <input
                                       value={tracking}
                                       onChange={(e) => setTracking(e.target.value)}
                                       placeholder="https://..."
                                     />
                                   </div>
-                                </div>
+                                )}
                               </section>
                             )}
                           </div>
 
-                          {belumLunasOnline && p.status === "menunggu" && (
-                            <p className="admin-form-note">
-                              ⏳ Pesanan ini dibayar online dan belum lunas. Tombol proses aktif setelah
-                              pembayaran masuk.
-                            </p>
-                          )}
+                          <div className="admin-langkah">
+                            <strong>Langkah berikutnya:</strong> {langkahBerikutnya(p, belumLunasOnline)}
+                          </div>
 
                           <div className="admin-form-actions">
                             {berikut && (
@@ -358,12 +391,16 @@ export function PesananManager({ pesananAwal }: { pesananAwal: PesananAdmin[] })
                                 disabled={saving || (belumLunasOnline && berikut !== "dibatalkan")}
                                 onClick={() => simpan(p, berikut)}
                               >
-                                {saving ? "Menyimpan..." : LABEL_AKSI[berikut]}
+                                {saving
+                                  ? "Menyimpan..."
+                                  : !delivery && berikut === "selesai"
+                                    ? "✅ Sudah Diambil Pembeli"
+                                    : LABEL_AKSI[berikut]}
                               </button>
                             )}
-                            {delivery && (
+                            {delivery && p.status === "dikirim" && (
                               <button type="button" className="btn-ghost" disabled={saving} onClick={() => simpan(p)}>
-                                Simpan Ongkir & Link
+                                Simpan Link Lacak
                               </button>
                             )}
                             {berikut && (

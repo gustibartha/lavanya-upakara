@@ -44,6 +44,12 @@ export async function PATCH(
   if (order.metode_bayar === "cod") {
     return Response.json({ message: "Pesanan sudah memakai COD" });
   }
+  if (order.shipping_method === "delivery") {
+    return Response.json(
+      { error: "Pesanan yang diantar kurir harus dibayar online. COD hanya untuk ambil di toko." },
+      { status: 409 },
+    );
+  }
   if (!PAYABLE.has(order.status_bayar) || order.status !== "menunggu") {
     return Response.json(
       { error: "Metode pembayaran tidak bisa diganti — pesanan sudah dibayar atau sudah diproses" },

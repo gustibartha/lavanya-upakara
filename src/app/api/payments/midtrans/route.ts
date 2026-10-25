@@ -90,6 +90,12 @@ export async function POST(request: Request) {
       name: item.product?.nama_produk ?? "Produk",
     }));
 
+    // Ongkir pesanan antar ikut dibayar di depan, sebagai baris tersendiri
+    // (Midtrans mensyaratkan jumlah semua baris = gross_amount).
+    if (order.shipping_method === "delivery" && order.ongkir && order.ongkir > 0) {
+      items.push({ id: "ongkir", price: order.ongkir, quantity: 1, name: "Ongkos kirim" });
+    }
+
     const grossAmount = items.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0,

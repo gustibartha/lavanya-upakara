@@ -5,11 +5,12 @@
 // satu pesanan per toko — bukan dicatat semuanya atas nama satu toko.
 
 import db from "@/db";
-import { orders, orderItems, products } from "@/db/schema";
+import { orders, orderItems, products, stores } from "@/db/schema";
 import { and, eq, inArray } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { JARAK_MAKS_KM, hitungOngkir } from "@/lib/ongkir";
 
 interface OrderItemInput {
   product_id?: unknown;
@@ -92,6 +93,16 @@ export async function POST(request: Request) {
   // Hanya dua metode yang dikenal; nilai lain diperlakukan sebagai COD.
   const metodeBayar = body.metode_bayar === "midtrans" ? "midtrans" : "cod";
 
+  // Kurir instan (GoSend/GrabExpress) tidak menagih tunai untuk kita, dan
+  // ongkirnya dibayar Lavanya saat memesan — jadi pesanan antar dibayar
+  // online di depan (barang + ongkir). COD hanya untuk ambil di toko.
+  if (shippingMethod === "delivery" && metodeBayar !== "midtrans") {
+    return Response.json(
+      { error: "Pesanan yang diantar harus dibayar online. Bayar di tempat (COD) hanya untuk ambil di toko." },
+      { status: 400 },
+    );
+  }
+
   try {
     const idProduk = [...jumlahPerProduk.keys()];
     const daftarProduk = await db
@@ -119,6 +130,27 @@ export async function POST(request: Request) {
       perToko.set(p.store_id, [...(perToko.get(p.store_id) ?? []), p]);
     }
 
+    // Ongkir per toko — tiap toko dijemput kurir terpisah.
+    const ongkirPerToko = new Map<string, number>();
+    if (shippingMethod === "delivery") {
+      const daftarToko = await db
+        .select({ id: stores.id, nama: stores.nama_toko, lat: stores.latitude, lng: stores.longitude })
+        .from(stores)
+        .where(inArray(stores.id, [...perToko.keys()]));
+      for (const t of daftarToko) {
+        const hasil = hitungOngkir({ lat: t.lat, lng: t.lng }, { lat, lng });
+        if (!hasil.terjangkau) {
+          return Response.json(
+            {
+              error: `Alamat terlalu jauh dari ${t.nama} (±${hasil.jarak_km} km, maksimal ${JARAK_MAKS_KM} km). Pilih "Ambil di Toko".`,
+            },
+            { status: 400 },
+          );
+        }
+        ongkirPerToko.set(t.id, hasil.ongkir);
+      }
+    }
+
     const pesananDibuat = [];
     for (const [storeId, produkToko] of perToko) {
       const orderId = `order-${randomUUID().slice(0, 8)}`;
@@ -126,6 +158,8 @@ export async function POST(request: Request) {
         (sum, p) => sum + p.harga * jumlahPerProduk.get(p.id)!,
         0,
       );
+      // Disimpan terpisah dari total_harga supaya komisi tetap dari barang saja.
+      const ongkir = shippingMethod === "delivery" ? ongkirPerToko.get(storeId) ?? null : null;
 
       await db.insert(orders).values({
         id: orderId,
@@ -143,6 +177,7 @@ export async function POST(request: Request) {
         shipping_service: shippingMethod === "delivery" ? body.shipping_service || null : null,
         lokasi_lat: shippingMethod === "delivery" ? lat : null,
         lokasi_lng: shippingMethod === "delivery" ? lng : null,
+        ongkir,
         catatan: body.catatan?.trim().slice(0, 500) || null,
         metode_bayar: metodeBayar,
         status_bayar: "belum_bayar",
@@ -162,6 +197,7 @@ export async function POST(request: Request) {
         id: orderId,
         store_id: storeId,
         total_harga: totalHarga,
+        ongkir,
         status: "menunggu",
         metode_bayar: metodeBayar,
         status_bayar: "belum_bayar",

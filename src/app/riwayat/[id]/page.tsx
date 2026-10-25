@@ -93,6 +93,30 @@ export default function OrderDetailPage() {
     return () => clearTimeout(timer);
   }, [fetchOrder, syncMidtransStatus]);
 
+  const [gantiCod, setGantiCod] = useState(false);
+  const gantiKeCod = () => {
+    const pesan =
+      order?.shipping_method === "delivery"
+        ? "Ganti pembayaran ke COD? Anda membayar tunai saat pesanan diantar. Kode pembayaran online sebelumnya akan dibatalkan."
+        : "Ganti pembayaran ke COD? Anda membayar tunai saat mengambil pesanan di toko. Kode pembayaran online sebelumnya akan dibatalkan.";
+    if (!window.confirm(pesan)) return;
+    setGantiCod(true);
+    fetch(`/api/orders/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ metode_bayar: "cod" }),
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) alert(data.error || "Gagal mengganti metode pembayaran");
+      })
+      .catch(() => alert("Koneksi bermasalah. Coba lagi."))
+      .finally(() => {
+        setGantiCod(false);
+        fetchOrder();
+      });
+  };
+
   const handleSyncClick = () => {
     setSyncing(true);
     syncMidtransStatus()
@@ -406,6 +430,18 @@ export default function OrderDetailPage() {
                       akan tertagih dua kali.
                     </p>
                   )}
+                  {order.metode_bayar === "midtrans" &&
+                    PAYABLE.has(order.status_bayar) &&
+                    order.status === "menunggu" && (
+                      <button
+                        type="button"
+                        className="btn btn-outline w-full"
+                        onClick={gantiKeCod}
+                        disabled={gantiCod}
+                      >
+                        {gantiCod ? "Mengganti..." : "💵 Ganti ke Bayar di Tempat (COD)"}
+                      </button>
+                    )}
                   {order.status === "selesai" && (
                     <Link href="/katalog" className="btn btn-primary w-full">
                       🛍️ Pesan Lagi

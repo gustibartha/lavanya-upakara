@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { PasswordInput } from "@/components/auth/PasswordInput";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
@@ -123,13 +124,11 @@ export default function DaftarPage() {
             <label htmlFor="password" className="auth-label">
               Password
             </label>
-            <input
+            <PasswordInput
               id="password"
-              type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Minimal 6 karakter"
-              className="auth-input"
               required
               autoComplete="new-password"
               minLength={6}
@@ -140,13 +139,11 @@ export default function DaftarPage() {
             <label htmlFor="konfirmasi" className="auth-label">
               Konfirmasi Password
             </label>
-            <input
+            <PasswordInput
               id="konfirmasi"
-              type="password"
               value={konfirmasi}
               onChange={(e) => setKonfirmasi(e.target.value)}
               placeholder="Ulangi password"
-              className="auth-input"
               required
               autoComplete="new-password"
               minLength={6}

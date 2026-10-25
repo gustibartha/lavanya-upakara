@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { PasswordInput } from "@/components/auth/PasswordInput";
 import { useRouter } from "next/navigation";
 
 export default function AdminLoginPage() {
@@ -67,13 +68,11 @@ export default function AdminLoginPage() {
 
           <div className="auth-field">
             <label htmlFor="password" className="auth-label">Kata Sandi</label>
-            <input
+            <PasswordInput
               id="password"
-              type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Masukkan kata sandi"
-              className="auth-input"
               required
               autoComplete="current-password"
             />

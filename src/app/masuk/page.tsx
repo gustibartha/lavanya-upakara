@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import { PasswordInput } from "@/components/auth/PasswordInput";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
@@ -78,13 +79,11 @@ function LoginContent() {
             <label htmlFor="password" className="auth-label">
               Password
             </label>
-            <input
+            <PasswordInput
               id="password"
-              type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Masukkan password"
-              className="auth-input"
               required
               autoComplete="current-password"
               minLength={6}

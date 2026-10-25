@@ -7,9 +7,13 @@ import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import {
   createSnapTransaction,
+  expireTransaction,
+  getTransactionStatus,
   isMidtransConfigured,
+  mapTransactionStatus,
   type SnapItem,
 } from "@/lib/midtrans";
+import { applyMidtransStatus } from "@/lib/apply-payment-status";
 
 export async function POST(request: Request) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -55,6 +59,26 @@ export async function POST(request: Request) {
         { error: "Pesanan ini sudah dibayar" },
         { status: 409 },
       );
+    }
+
+    // Pembeli membuka pembayaran lagi (mis. salah memilih QRIS dan ingin
+    // ganti metode). Sebelum membuat transaksi baru: kalau transaksi lama
+    // ternyata sudah dibayar, catat dan jangan tagih lagi; kalau belum,
+    // akhiri transaksinya supaya kode QRIS/VA lama tidak bisa dibayar
+    // dobel. Kegagalan di langkah ini tidak menghentikan pembayaran baru —
+    // misalnya Snap lama yang belum sempat memilih metode memang tidak
+    // punya transaksi untuk diakhiri.
+    if (order.midtrans_order_id) {
+      try {
+        const lama = await getTransactionStatus(order.midtrans_order_id);
+        if (mapTransactionStatus(lama.transaction_status, lama.fraud_status) === "dibayar") {
+          await applyMidtransStatus(order, lama);
+          return Response.json({ error: "Pesanan ini sudah dibayar" }, { status: 409 });
+        }
+        await expireTransaction(order.midtrans_order_id);
+      } catch {
+        // Transaksi lama tidak ditemukan di Midtrans — tidak ada yang perlu diakhiri.
+      }
     }
 
     // Nominal dan rincian item selalu dihitung ulang dari database — nilai

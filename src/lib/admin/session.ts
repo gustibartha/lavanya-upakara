@@ -11,7 +11,7 @@
 
 import { randomBytes } from "crypto";
 import { cookies } from "next/headers";
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { db } from "@/db";
 import { adminSessions, type Admin } from "@/db/schema";
 
@@ -52,6 +52,16 @@ export async function destroyAdminSession() {
     await db.delete(adminSessions).where(eq(adminSessions.id, token));
   }
   jar.delete(COOKIE_NAME);
+}
+
+/** Setelah kata sandi diganti: keluarkan semua perangkat lain milik admin
+ *  ini, tapi biarkan sesi yang sedang dipakai tetap masuk. */
+export async function hapusSesiLain(adminId: string) {
+  const jar = await cookies();
+  const token = jar.get(COOKIE_NAME)?.value ?? "";
+  await db
+    .delete(adminSessions)
+    .where(and(eq(adminSessions.admin_id, adminId), ne(adminSessions.id, token)));
 }
 
 /**

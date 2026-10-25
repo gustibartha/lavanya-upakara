@@ -1,10 +1,81 @@
-// GET /api/orders/[id] — Get single order detail with items and store info
+// GET   /api/orders/[id] — detail pesanan beserta toko & item
+// PATCH /api/orders/[id] — pembeli mengganti pesanan online yang belum
+//                          dibayar menjadi bayar di tempat (COD)
 
 import db from "@/db";
 import { orders, orderItems, products, stores } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { PAYABLE } from "@/lib/order-status";
+import {
+  expireTransaction,
+  getTransactionStatus,
+  isMidtransConfigured,
+  mapTransactionStatus,
+} from "@/lib/midtrans";
+import { applyMidtransStatus } from "@/lib/apply-payment-status";
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  let body: { metode_bayar?: unknown };
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: "Body tidak valid" }, { status: 400 });
+  }
+  if (body.metode_bayar !== "cod") {
+    return Response.json({ error: "Hanya bisa mengganti ke bayar di tempat (COD)" }, { status: 400 });
+  }
+
+  const { id } = await params;
+  const [order] = await db.select().from(orders).where(eq(orders.id, id)).limit(1);
+  if (!order || order.user_id !== session.user.id) {
+    return Response.json({ error: "Pesanan tidak ditemukan" }, { status: 404 });
+  }
+
+  if (order.metode_bayar === "cod") {
+    return Response.json({ message: "Pesanan sudah memakai COD" });
+  }
+  if (!PAYABLE.has(order.status_bayar) || order.status !== "menunggu") {
+    return Response.json(
+      { error: "Metode pembayaran tidak bisa diganti — pesanan sudah dibayar atau sudah diproses" },
+      { status: 409 },
+    );
+  }
+
+  // Pastikan transaksi online yang terakhir dibuka tidak sudah dibayar,
+  // lalu matikan kode pembayarannya supaya tidak tertagih dua kali.
+  if (order.midtrans_order_id && isMidtransConfigured()) {
+    try {
+      const terakhir = await getTransactionStatus(order.midtrans_order_id);
+      if (mapTransactionStatus(terakhir.transaction_status, terakhir.fraud_status) === "dibayar") {
+        await applyMidtransStatus(order, terakhir);
+        return Response.json(
+          { error: "Pembayaran online untuk pesanan ini ternyata sudah masuk — pesanan sudah lunas" },
+          { status: 409 },
+        );
+      }
+      await expireTransaction(order.midtrans_order_id);
+    } catch {
+      // Belum ada transaksi di Midtrans (Snap ditutup sebelum memilih metode).
+    }
+  }
+
+  await db
+    .update(orders)
+    .set({ metode_bayar: "cod", status_bayar: "belum_bayar", payment_type: null })
+    .where(eq(orders.id, id));
+
+  return Response.json({ message: "Pembayaran diganti ke bayar di tempat (COD)" });
+}
 
 export async function GET(
   _request: Request,

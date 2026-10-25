@@ -955,6 +955,18 @@ footer { background: var(--malam); color: var(--muted); padding: 4rem 0 2rem; ma
   border-color: var(--kunyit);
   box-shadow: 0 0 0 3px rgba(200, 105, 10, 0.08);
 }
+.auth-password-wrap { position: relative; }
+.auth-password-input { padding-right: 3rem; }
+/* Sembunyikan tombol "reveal" bawaan Edge supaya tidak ada dua ikon mata. */
+.auth-password-input::-ms-reveal { display: none; }
+.auth-password-toggle {
+  position: absolute; top: 50%; right: 0.5rem; transform: translateY(-50%);
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted); cursor: pointer; transition: color 0.2s, background 0.2s;
+}
+.auth-password-toggle:hover { color: var(--kunyit); background: var(--kunyit-lite); }
+.auth-password-toggle:focus-visible { outline: 2px solid var(--kunyit); outline-offset: 1px; }
 .auth-submit {
   width: 100%;
   padding: 0.85rem;
